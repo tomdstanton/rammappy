@@ -1,0 +1,39 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "rammappy"
+version = "0.1.0"
+description = "High-performance, zero-copy Python bindings for rammap (minimap2 Rust rewrite)"
+authors = [
+    { name = "rammappy developers" }
+]
+requires-python = ">=3.9"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "rammappy"
+profile = "release"
+
+[tool.uv]
+
+[dependency-groups]
+dev = [
+    "black>=25.11.0",
+    "mypy>=1.19.1",
+    "pdoc>=15.0.4",
+    "pytest>=8.0.0",
+    "ruff>=0.15.21",
+    "ty>=0.0.59",
+]
+# Modern Astral uv configuration
+# This allows 'uv pip install -e .' or 'uv run' to seamlessly build and manage
+# the workspace using maturin under the hood.

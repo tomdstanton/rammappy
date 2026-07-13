@@ -1,0 +1,14 @@
+[package]
+name = "rammappy"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "rammappy"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.29.0", features = ["extension-module"] }
+pyo3-stub-gen = "0.23.0"
+rammap-core = "1.1.1"
+rayon = "1.10"
