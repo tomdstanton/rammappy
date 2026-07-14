@@ -3,6 +3,13 @@ name = "rammappy"
 version = "0.1.0"
 edition = "2024"
 
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/tomdstanton/rammappy"
+readme = "README.md"
+
 [lib]
 name = "_rammappy"
 crate-type = ["cdylib", "rlib"]

@@ -12,6 +12,7 @@ default:
 install:
     uv pip install -e .
     cargo run --bin stub_gen --no-default-features
+    uv run python -c "f = 'python/rammappy/_rammappy/__init__.pyi'; content = open(f).read(); open(f, 'w').write(content.replace('_rammappy.Mapping', 'Mapping'))"
 
 
 # Build the Rust extension in release mode
@@ -56,6 +57,10 @@ ci: lint test
 build-wheels:
     uv run maturin build --release
 
+# Set version in Cargo.toml (useful in CI to sync with git tag)
+set-version VERSION:
+    uv run python -c "import re; content = open('Cargo.toml').read(); content = re.sub(r'^version\s*=\s*\".*\"', 'version = \"' + '{{VERSION}}'.lstrip('v') + '\"', content, flags=re.MULTILINE); open('Cargo.toml', 'w').write(content)"
+
 # Publish to PyPI
 publish: build-wheels
     uv run maturin upload target/wheels/*
@@ -75,6 +80,13 @@ docs-test:
     cp README.md docs/index.md
     cp CONTRIBUTING.md docs/contributing.md
     uv run zensical build -s
+
+# Build the documentation into a static site
+docs-build:
+    mkdir -p docs
+    cp README.md docs/index.md
+    cp CONTRIBUTING.md docs/contributing.md
+    uv run zensical build
 
 # --- Cleanup ---
 

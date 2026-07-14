@@ -1,49 +1,46 @@
-site_name = "🔗🐍🧬 rammappy"
+site_name = "rammappy docs"
 site_description = "A Python interface to rammap, the Rust implementation of minimap2"
 site_url = "https://tomdstanton.github.io/rammappy/"
 repo_url = "https://github.com/tomdstanton/rammappy"
 repo_name = "tomdstanton/rammappy"
 site_author = "Tom Stanton"
-
 nav = [
     { "Home" = "index.md" },
-    { "Performance & Benchmarks" = "benchmarks.md" },
-    { "API Reference" = "api.md" },
+    { "API Reference" = [
+        { "Overview" = "api/index.md" },
+        { "Align" = "api/align.md" },
+        { "Sketch" = "api/sketch.md" },
+        { "IO" = "api/io.md" }
+    ] },
     { "Development" = [
         { "Contributing" = "contributing.md" }
-    ] }
+    ] },
+ # { "Performance & Benchmarks" = "benchmarks.md" },
 ]
 
 [theme]
-name = "material"
+name = "catppuccin"
+icon.repo = "fontawesome/brands/github"
+icon.logo = "lucide/dna-off"
+font.text = "Noto Sans"
+font.code = "JetBrains Mono"
 features = [
+    "announce.dismiss",
+    "content.code.copy",
+    "header.autohide",
+    "navigation.top",
+    "navigation.footer",
     "navigation.tabs",
+    "navigation.tracking",
     "navigation.sections",
     "navigation.expand",
-    "content.code.copy"
+    "navigation.instant",
+    "navigation.instant.progress",
+    "search.suggest",
+    "search.highlight" ,
+    "search.share",
+    "toc.follow",
 ]
-
-# Light Mode (Default)
-[[theme.palette]]
-scheme = "default"
-primary = "indigo"
-accent = "deep purple"
-[theme.palette.toggle]
-icon = "material/brightness-7"
-name = "Switch to dark mode"
-
-# Dark Mode (Slate)
-[[theme.palette]]
-scheme = "slate"
-primary = "indigo"
-accent = "deep purple"
-[theme.palette.toggle]
-icon = "material/brightness-4"
-name = "Switch to light mode"
-
-[theme.font]
-text = "Roboto"
-code = "JetBrains Mono"
 
 [markdown_extensions]
 admonition = {}
@@ -54,8 +51,12 @@ admonition = {}
 "pymdownx.inlinehilite" = {}
 "pymdownx.arithmatex" = { generic = true }
 
+
 [plugins]
 search = {}
 
 [plugins.mkdocstrings.handlers.python]
 paths = ["python"]
+
+[plugins.mkdocstrings.handlers.python.options]
+filters = ["!^__doc__$", "!^__module__$"]

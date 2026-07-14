@@ -237,5 +237,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
-rammap/
+
+
+rammap-core/
 .cargo/
+docs/index.md
+docs/contributing.md

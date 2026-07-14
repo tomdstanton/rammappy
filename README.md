@@ -1,13 +1,11 @@
-# 🔗🐍🧬 Rammappy [![Stars](https://img.shields.io/github/stars/tomdstanton/rammappy.svg?style=social&maxAge=3600&label=Star)](https://github.com/tomdstanton/rammappy/stargazers)
-*A Python interface to [rammap](https://github.com/jwanglab/rammap), the Rust implementation of minimap2*
+# 🔗🐍🧬 `rammappy`
+* A Python interface to [rammap](https://github.com/jwanglab/rammap), the Rust implementation of minimap2*
 
-[![Release](https://img.shields.io/github/v/release/tomdstanton/rammappy?style=flat-square)](https://img.shields.io/github/v/release/tomdstanton/rammappy)
-[![License](https://img.shields.io/github/license/tomdstanton/rammappy?style=flat-square)](https://img.shields.io/github/license/tomdstanton/rammappy)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19059429.svg?style=flat-square)](https://doi.org/10.5281/zenodo.19059429)
-[![PyPI](https://img.shields.io/pypi/v/rammappy.svg?style=flat-square&maxAge=3600&logo=PyPI)](https://pypi.org/project/rammappy)
-[![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/tomdstanton/rammappy/)
-[![Issues](https://img.shields.io/github/issues/tomdstanton/rammappy.svg?style=flat-square&maxAge=600)](https://github.com/tomdstanton/rammappy/issues)
-[![Downloads](https://img.shields.io/pypi/dm/rammappy?style=flat-square&color=303f9f&maxAge=86400&label=downloads)](https://pepy.tech/project/rammappy)
+[![Release](https://img.shields.io/github/v/release/tomdstanton/rammappy)](https://img.shields.io/github/v/release/tomdstanton/rammappy)
+[![PyPI](https://img.shields.io/pypi/v/rammappy.svg?logo=PyPI)](https://pypi.org/project/rammappy)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
+[![Stars](https://img.shields.io/github/stars/tomdstanton/rammappy.svg?style=social&maxAge=3600&label=Star)](https://github.com/tomdstanton/rammappy/stargazers)
 
 ---
 
@@ -47,21 +45,6 @@ for i, mappings in enumerate(batch_results):
         print(f"Query {i+1} mapped to {first_hit.target_name.decode()} at {first_hit.target_start}")
 ```
 
-## Development
-
-Built and tested via `uv`.
-
-```bash
-# Add development dependencies
-uv add --dev ty black ruff
-
-# Install locally
-uv pip install -e .
-```
-# Implementation of `rammappy` Python Bindings
-
-This document details the architectural decisions, design choices, and structural models that form the `rammappy` Python bindings leveraging `PyO3` wrapping `rammap-core` components.
-
 ## Core Design Philosophy
 The overriding goal for this project was to establish **extremely performant, zero-copy FFI bindings** linking the Rust core API to Python. A focus was applied to maintain "bare metal Rust" speeds while providing a clean and "lazy" Python API.
 
@@ -100,8 +83,6 @@ Their `.sketch()` methods immediately map the resulting minimizers onto a heavil
 * **`MinimizerSketcher`, `SyncmerSketcher`, `RandstrobeSketcher`:** Core interfaces evaluating seeds.
 * **`Minimizer`:** Payload returned from Sketchers.
 # rammappy Implementation
-
-This document lays out the architectural decisions and implementation details for the `rammappy` Python bindings of `rammap-core`.
 
 ## 1. Rust-Python Bridge (PyO3)
 

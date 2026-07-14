@@ -3,49 +3,307 @@
 
 import builtins
 import enum
+import os
+import pathlib
 import typing
 __all__ = [
     "Aligner",
+    "CigarOp",
+    "FastxReader",
+    "Index",
     "Mapping",
     "MappingIterator",
     "Minimizer",
     "MinimizerSketcher",
     "Preset",
     "RandstrobeSketcher",
+    "Strand",
     "SyncmerSketcher",
 ]
 
 @typing.final
 class Aligner:
     r"""
-    The core aligner object. 
-    It encapsulates the `RustAligner` from `rammap-core` and executes the alignments.
+    The `Aligner` orchestrates the alignment process.
+    
+    It encapsulates the alignment configuration and the index to map query sequences against reference targets.
+    
+    Examples:
+        >>> from rammappy import Index, Aligner, Preset
+        >>> index = Index.build([(b"target1", b"ATGC...")])
+        >>> aligner = Aligner(index, preset=Preset.MapOnt)
+        >>> for mapping in aligner.map(b"query1", b"ATGC..."):
+        ...     print(mapping.score)
     """
-    def __new__(cls, targets: typing.Sequence[tuple[bytes, bytes]], preset: Preset = Preset.MapOnt, do_cigar: builtins.bool = True, do_cs: builtins.bool = True, do_md: builtins.bool = True) -> Aligner:
+    @property
+    def seq_names(self) -> builtins.list[builtins.str]:
         r"""
-        Create a new aligner instance with predefined target genomes.
-        Using Python `bytes` for genomic data sidesteps UTF-8 validation overhead present in normal strings.
+        Returns the sequence names in the index.
+        
+        Returns:
+            list[str]: The list of sequence names.
+        """
+    def __new__(cls, index: Index, preset: Preset = Preset.MapOnt, do_cigar: builtins.bool = True, do_cs: builtins.bool = True, do_md: builtins.bool = True) -> Aligner:
+        r"""
+        Create a new aligner instance using an already built index.
+        
+        Args:
+            index (Index): The built index object.
+            preset (Preset): The preset configuration (e.g. `Preset.MapOnt`). Defaults to `Preset.MapOnt`.
+            do_cigar (bool): Whether to compute CIGAR strings. Defaults to `True`.
+            do_cs (bool): Whether to compute `cs` tags. Defaults to `True`.
+            do_md (bool): Whether to compute `md` tags. Defaults to `True`.
+        
+        Returns:
+            Aligner: The initialized aligner object.
+        """
+    @staticmethod
+    def from_fasta(path: builtins.str | os.PathLike | pathlib.Path, preset: Preset = Preset.MapOnt) -> Aligner:
+        r"""
+        Create an aligner from a FASTA file.
+        
+        Args:
+            path (os.PathLike): The file path to the FASTA file.
+            preset (Preset): The preset configuration (e.g. `Preset.MapOnt`). Defaults to `Preset.MapOnt`.
+        
+        Returns:
+            Aligner: The initialized aligner object.
+        """
+    @staticmethod
+    def from_index(path: builtins.str | os.PathLike | pathlib.Path, preset: Preset = Preset.MapOnt) -> Aligner:
+        r"""
+        Create an aligner from an index file.
+        
+        Args:
+            path (os.PathLike): The file path to the saved index file.
+            preset (Preset): The preset configuration (e.g. `Preset.MapOnt`). Defaults to `Preset.MapOnt`.
+        
+        Returns:
+            Aligner: The initialized aligner object.
         """
     def map(self, query_name: bytes, query_seq: bytes) -> MappingIterator:
         r"""
         Maps a single query sequence sequentially to the targets.
+        
+        Args:
+            query_name (bytes): The name of the query sequence.
+            query_seq (bytes): The query sequence.
+        
+        Returns:
+            MappingIterator: An iterator over the generated mappings.
         """
     def map_batch(self, queries: typing.Sequence[tuple[bytes, bytes]]) -> builtins.list[MappingIterator]:
         r"""
-        Performs zero-copy, highly parallelized batch alignments mapping over `queries`.
+        Performs highly parallelized batch alignments mapping over multiple queries.
         
-        To bypass the GIL and utilize multiple threads for parallelism (via Rayon), we must avoid executing
-        native Python code or invoking Python objects during the mapping loops. `Bound<'py, PyBytes>` offers zero-copy
-        memory pointers to the Python memory regions, however, `Bound` relies on the GIL. We drop the GIL using `py.detach(|| ...)`
-        but must carefully encapsulate the memory bounds outside the Rayon threads using Raw Pointers.
+        Bypasses the GIL to utilize multiple threads for parallelism (via Rayon).
+        
+        Args:
+            queries (list[tuple[bytes, bytes]]): A list of tuples containing `(name, sequence)` as bytes.
+        
+        Returns:
+            list[MappingIterator]: A list of iterators, one for each query sequence.
+        """
+    def load_junctions_bed(self, path: builtins.str | os.PathLike | pathlib.Path) -> None:
+        r"""
+        Load splice junctions from a BED file.
+        
+        Args:
+            path (os.PathLike | str): Path to the BED file.
+        """
+    def load_junctions_spsc(self, path: builtins.str | os.PathLike | pathlib.Path, scale: typing.Optional[builtins.float] = None) -> None:
+        r"""
+        Load splice junctions from a SPSC file.
+        
+        Args:
+            path (os.PathLike | str): Path to the SPSC file.
+            scale (float | None): Optional scaling factor.
+        """
+    def seq(self, name: builtins.str, start: typing.Optional[builtins.int] = None, end: typing.Optional[builtins.int] = None) -> builtins.str:
+        r"""
+        Returns the sequence for a given target name.
+        
+        Args:
+            name (str): The name of the target sequence.
+            start (int, optional): The 0-based start coordinate. Defaults to 0.
+            end (int, optional): The 0-based end coordinate. Defaults to the end of the sequence.
+        
+        Returns:
+            str: The requested sequence.
+        
+        Raises:
+            ValueError: If the sequence name is not found in the index.
+        """
+
+@typing.final
+class CigarOp:
+    r"""
+    Structured CIGAR operation (length and operation type).
+    
+    Attributes:
+        len (int): Operation length.
+        op (str): Operation type character (M, I, D, N, S, H, =, X).
+    """
+    @property
+    def len(self) -> builtins.int: ...
+    @property
+    def op(self) -> builtins.str: ...
+
+@typing.final
+class FastxReader:
+    r"""
+    A reader for parsing FASTA/FASTQ files.
+    
+    The `FastxReader` allows parsing of uncompressed or gzip-compressed
+    FASTA/FASTQ files and acts as a Python iterator, yielding sequence records.
+    
+    Examples:
+        >>> from rammappy import FastxReader
+        >>> reader = FastxReader("test.fa")
+        >>> for name, seq, qual in reader:
+        ...     print(f"{name}: {seq}")
+    """
+    def __new__(cls, path: builtins.str | os.PathLike | pathlib.Path) -> FastxReader:
+        r"""
+        Open a FASTA/FASTQ file for reading.
+        
+        Args:
+            path (os.PathLike): The file path to read from. Supports `.gz` compression.
+        
+        Returns:
+            FastxReader: An iterator over the sequence records.
+        
+        Raises:
+            IOError: If the file cannot be opened.
+        """
+    def __iter__(self) -> FastxReader: ...
+    def __next__(self) -> typing.Optional[tuple[builtins.str, bytes, typing.Optional[bytes]]]:
+        r"""
+        Return the next sequence record.
+        
+        Yields:
+            tuple[str, bytes, bytes | None]: A tuple containing the sequence name, 
+            the sequence itself (as bytes), and optionally the quality string (as bytes).
+        """
+
+@typing.final
+class Index:
+    r"""
+    The `Index` object represents a genomic sequence index.
+    
+    It holds the internal Rust Index for alignment. You can construct an index
+    from a collection of sequences, or load it from a previously saved file.
+    
+    Examples:
+        >>> from rammappy import Index
+        >>> index = Index.build([(b"target1", b"ATGC...")])
+        >>> index.save("my_index.mmi")
+        >>> loaded_index = Index.load("my_index.mmi")
+    """
+    @property
+    def kmer_size(self) -> builtins.int: ...
+    @property
+    def window_size(self) -> builtins.int: ...
+    @property
+    def homopolymer_compressed(self) -> builtins.bool: ...
+    @property
+    def seq_names(self) -> builtins.list[builtins.str]:
+        r"""
+        Returns the sequence names in the index.
+        
+        Returns:
+            list[str]: The list of sequence names.
+        """
+    @staticmethod
+    def build(seqs: typing.Sequence[tuple[bytes, bytes]], w: builtins.int = 10, k: builtins.int = 15, is_hpc: builtins.bool = False, max_occ: builtins.int = 50000) -> Index:
+        r"""
+        Build an index from target sequences.
+        
+        Args:
+            seqs (list[tuple[bytes, bytes]]): A list of tuples containing `(name, sequence)` as bytes.
+            w (int): Window size. Defaults to 10.
+            k (int): K-mer size. Defaults to 15.
+            is_hpc (bool): Homopolymer compressed. Defaults to False.
+            max_occ (int): Maximum occurrences. Defaults to 50000.
+        
+        Returns:
+            Index: The built index.
+        """
+    @staticmethod
+    def load(path: builtins.str | os.PathLike | pathlib.Path) -> Index:
+        r"""
+        Load an index from file.
+        
+        Args:
+            path (os.PathLike): The file path to load the index from.
+        
+        Returns:
+            Index: The loaded index.
+        """
+    def save(self, path: builtins.str | os.PathLike | pathlib.Path) -> None:
+        r"""
+        Save the index to a file.
+        
+        Args:
+            path (os.PathLike): The file path to save the index to.
+        """
+    def strip_sequences(self) -> None:
+        r"""
+        Strip sequences from the index to save memory.
+        
+        This removes the actual sequence bytes from memory, which is useful when
+        you only need to perform mapping and do not need base-level alignment (CIGAR).
+        
+        Examples:
+            >>> index.strip_sequences()
+        """
+    def seq(self, name: builtins.str, start: typing.Optional[builtins.int] = None, end: typing.Optional[builtins.int] = None) -> builtins.str:
+        r"""
+        Returns the sequence for a given target name.
+        
+        Args:
+            name (str): The name of the target sequence.
+            start (int, optional): The 0-based start coordinate. Defaults to 0.
+            end (int, optional): The 0-based end coordinate. Defaults to the end of the sequence.
+        
+        Returns:
+            str: The requested sequence.
+        
+        Raises:
+            ValueError: If the sequence name is not found in the index.
         """
 
 @typing.final
 class Mapping:
     r"""
     Python representation of an alignment `Mapping`.
-    By wrapping `RustMapping` internally, we enforce lazy-evaluation semantics.
-    The fields of the underlying struct are mapped via Python property getters.
+    
+    Mappings are lazily evaluated: the actual Rust-level objects are preserved 
+    until accessed via the Python properties.
+    
+    Attributes:
+        target_name (bytes): The name of the target sequence.
+        target_id (int): Target sequence numeric index.
+        target_len (int): Target sequence length.
+        target_start (int): Start coordinate on the target.
+        target_end (int): End coordinate on the target.
+        query_start (int): Start coordinate on the query.
+        query_end (int): End coordinate on the query.
+        strand (Strand): Orientation of the alignment.
+        score (int): Alignment score.
+        mapq (int): Mapping quality (0-255).
+        is_primary (bool): True if this is the primary alignment.
+        is_supplementary (bool): True if this is a supplementary alignment.
+        is_spliced (bool): True if this alignment contains splice junctions.
+        trans_strand (Strand | None): Transcript strand for splice alignments, if known.
+        matches (int): Number of matching bases.
+        block_len (int): Alignment block length.
+        edit_distance (int): Edit distance (NM tag).
+        divergence (float): Sequence divergence (0.0 = identical).
+        cigar (bytes | None): The CIGAR string, if requested during alignment.
+        cigar_ops (list[CigarOp] | None): Structured CIGAR operations, if requested.
+        cs (bytes | None): CS tag string, if requested.
+        md (bytes | None): MD tag string, if requested.
     """
     @property
     def target_name(self) -> bytes:
@@ -63,7 +321,7 @@ class Mapping:
     @property
     def query_end(self) -> builtins.int: ...
     @property
-    def strand(self) -> builtins.int: ...
+    def strand(self) -> Strand: ...
     @property
     def score(self) -> builtins.int: ...
     @property
@@ -71,9 +329,30 @@ class Mapping:
     @property
     def is_primary(self) -> builtins.bool: ...
     @property
+    def is_supplementary(self) -> builtins.bool: ...
+    @property
+    def is_spliced(self) -> builtins.bool: ...
+    @property
+    def trans_strand(self) -> typing.Optional[Strand]: ...
+    @property
+    def matches(self) -> builtins.int: ...
+    @property
+    def block_len(self) -> builtins.int: ...
+    @property
+    def edit_distance(self) -> builtins.int: ...
+    @property
+    def target_id(self) -> builtins.int: ...
+    @property
+    def divergence(self) -> builtins.float: ...
+    @property
     def cigar(self) -> typing.Optional[bytes]:
         r"""
         Returns the optional CIGAR string as a lazy byte array.
+        """
+    @property
+    def cigar_ops(self) -> typing.Optional[builtins.list[CigarOp]]:
+        r"""
+        Returns the structured CIGAR operations.
         """
     @property
     def cs(self) -> typing.Optional[bytes]:
@@ -85,13 +364,19 @@ class Mapping:
         r"""
         Returns the optional MD string as a lazy byte array.
         """
+    def __str__(self) -> builtins.str: ...
+    def __repr__(self) -> builtins.str: ...
 
 @typing.final
 class MappingIterator:
     r"""
-    A lazy iterator that yields Mapping wrapper objects on demand.
-    Instead of allocating a `Vec<Mapping>` (which copies the mappings and increases peak memory),
-    we hold an iterator of Rust mappings and materialize Python wrapper objects only when requested via `next()`.
+    A lazy iterator that yields `Mapping` objects.
+    
+    Instead of allocating a list, we hold an iterator of Rust mappings 
+    and materialize Python wrapper objects only when requested via `next()`.
+    
+    Yields:
+        Mapping: The next alignment mapping.
     """
     def __iter__(self) -> MappingIterator: ...
     def __next__(self) -> typing.Optional[Mapping]: ...
@@ -99,9 +384,13 @@ class MappingIterator:
 @typing.final
 class Minimizer:
     r"""
-    Python wrapper for the core `Minimizer` struct.
-    We #[derive(Clone)] so it can be returned easily as a vector to Python.
-    The attributes `x` and `y` are directly exposed as read-only properties to avoid Python getter overhead.
+    Represents a k-mer sketch (minimizer, syncmer, etc.).
+    
+    Contains the genomic coordinate and the hash value.
+    
+    Attributes:
+        x (int): The 64-bit integer combining the genomic coordinate and other metadata.
+        y (int): The 64-bit hash value of the k-mer.
     """
     @property
     def x(self) -> builtins.int: ...
@@ -111,41 +400,121 @@ class Minimizer:
 @typing.final
 class MinimizerSketcher:
     r"""
-    A Sketcher for Minimizers.
-    This exposes the underlying `MinimizerSketcher` from the Rust core.
+    A sketcher that extracts minimizers from sequences.
+    
+    Minimizers are the lexicographically smallest k-mers in a sliding window of size w.
+    
+    Examples:
+        >>> from rammappy.sketch import MinimizerSketcher
+        >>> sketcher = MinimizerSketcher(k=15, w=10)
+        >>> sketcher.sketch(b"ATGCGTACGATCGATC")
+        [<Minimizer object at ...>, ...]
     """
     def __new__(cls, k: builtins.int, w: builtins.int) -> MinimizerSketcher:
         r"""
-        Initialize a new MinimizerSketcher with k-mer size `k` and window size `w`.
-        The Rust struct fields are directly instantiated as the Rust core does not expose a `new` function for this type.
+        Initialize a new MinimizerSketcher.
+        
+        Args:
+            k (int): The k-mer size.
+            w (int): The window size.
+        
+        Returns:
+            MinimizerSketcher: The initialized sketcher.
         """
     def sketch(self, seq: bytes) -> builtins.list[Minimizer]:
         r"""
-        Extract seeds/minimizers from a byte string sequence.
-        Bytes (`&Bound<'_, PyBytes>`) are preferred here instead of `String` for zero-copy FFI when interfacing with Python `bytes`.
+        Extract minimizers from a byte string sequence.
+        
+        Args:
+            seq (bytes): The sequence to sketch.
+        
+        Returns:
+            list[Minimizer]: A list of minimizer objects.
         """
 
 @typing.final
 class RandstrobeSketcher:
     r"""
-    A Sketcher for Randstrobes.
+    A sketcher that extracts randstrobes from sequences.
+    
+    Randstrobes are combinations of k-mers that provide more resilient matching.
+    
+    Examples:
+        >>> from rammappy.sketch import RandstrobeSketcher
+        >>> sketcher = RandstrobeSketcher(k=15, w_min=10, w_max=30)
+        >>> sketcher.sketch(b"ATGCGTACGATCGATC")
+        [<Minimizer object at ...>, ...]
     """
-    def __new__(cls, k: builtins.int, w_min: builtins.int, w_max: builtins.int) -> RandstrobeSketcher: ...
-    def sketch(self, seq: bytes) -> builtins.list[Minimizer]: ...
+    def __new__(cls, k: builtins.int, w_min: builtins.int, w_max: builtins.int) -> RandstrobeSketcher:
+        r"""
+        Create a new RandstrobeSketcher.
+        
+        Args:
+            k (int): The k-mer size.
+            w_min (int): The minimum window size.
+            w_max (int): The maximum window size.
+        
+        Returns:
+            RandstrobeSketcher: The initialized sketcher.
+        """
+    def sketch(self, seq: bytes) -> builtins.list[Minimizer]:
+        r"""
+        Extract randstrobes from a byte string sequence.
+        
+        Args:
+            seq (bytes): The sequence to sketch.
+        
+        Returns:
+            list[Minimizer]: A list of randstrobe objects.
+        """
 
 @typing.final
 class SyncmerSketcher:
     r"""
-    A Sketcher for Syncmers.
+    A sketcher that extracts syncmers from sequences.
+    
+    Syncmers provide a more evenly spaced sampling of sequences compared to minimizers.
+    
+    Examples:
+        >>> from rammappy.sketch import SyncmerSketcher
+        >>> sketcher = SyncmerSketcher(k=15, s=5)
+        >>> sketcher.sketch(b"ATGCGTACGATCGATC")
+        [<Minimizer object at ...>, ...]
     """
-    def __new__(cls, k: builtins.int, s: builtins.int) -> SyncmerSketcher: ...
-    def sketch(self, seq: bytes) -> builtins.list[Minimizer]: ...
+    def __new__(cls, k: builtins.int, s: builtins.int) -> SyncmerSketcher:
+        r"""
+        Create a new SyncmerSketcher.
+        
+        Args:
+            k (int): The k-mer size.
+            s (int): The s-mer size.
+        
+        Returns:
+            SyncmerSketcher: The initialized sketcher.
+        """
+    def sketch(self, seq: bytes) -> builtins.list[Minimizer]:
+        r"""
+        Extract syncmers from a byte string sequence.
+        
+        Args:
+            seq (bytes): The sequence to sketch.
+        
+        Returns:
+            list[Minimizer]: A list of syncmer objects.
+        """
 
 @typing.final
 class Preset(enum.Enum):
     r"""
-    The mapping presets available in `rammap`.
-    Exposed as a Python Enum for seamless instantiation in Python.
+    The mapping presets available in `rammappy`.
+    
+    These presets configure the aligner for different sequencing technologies 
+    and use cases, tuning heuristics and scoring.
+    
+    Examples:
+        >>> from rammappy import Index, Aligner, Preset
+        >>> index = Index.build([(b"target1", b"ATGC...")])
+        >>> aligner = Aligner(index, preset=Preset.MapOnt)
     """
     MapOnt = ...
     MapHifi = ...
@@ -155,4 +524,18 @@ class Preset(enum.Enum):
     Asm10 = ...
     Asm20 = ...
     MapPb = ...
+
+@typing.final
+class Strand(enum.Enum):
+    r"""
+    Strand orientation of an alignment.
+    
+    Represents whether the query mapped to the forward or reverse strand of the target.
+    
+    Attributes:
+        Forward: The forward strand.
+        Reverse: The reverse complement strand.
+    """
+    Forward = ...
+    Reverse = ...
 

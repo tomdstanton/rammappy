@@ -4,91 +4,47 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
 
 jobs:
-  build-wheels:
+  build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Inject Git tag version into Cargo.toml
-        shell: bash
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "Setting package version to $VERSION"
-          sed -i.bak "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
-          rm -f Cargo.toml.bak
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
       - name: Install uv
         uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Install just
-        uses: taiki-e/install-action@just
-
+        uses: extractions/setup-just@v2
+      - name: Set Version from Tag
+        run: just set-version ${{ github.ref_name }}
       - name: Build wheels
         run: just build-wheels
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}
           path: target/wheels/*.whl
 
-  build-sdist:
-    name: Build sdist
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Inject Git tag version into Cargo.toml
-        shell: bash
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "Setting package version to $VERSION"
-          sed -i.bak "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
-          rm -f Cargo.toml.bak
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          enable-cache: true
-
-      - name: Build sdist
-        run: uv run maturin sdist --out target/wheels
-
-      - name: Upload sdist
-        uses: actions/upload-artifact@v4
-        with:
-          name: sdist
-          path: target/wheels/*.tar.gz
-
   publish:
     name: Publish to PyPI
-    needs: [build-wheels, build-sdist]
+    needs: [build_wheels]
     runs-on: ubuntu-latest
-    environment: pypi
+    environment:
+      name: pypi
+      url: https://pypi.org/p/rammappy
     permissions:
-      id-token: write  # IMPORTANT: Required for PyPI Trusted Publishing (OIDC)
-      contents: read
+      id-token: write
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
+          pattern: wheels-*
           path: dist
-          pattern: '*'
           merge-multiple: true
-
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist

@@ -24,7 +24,8 @@ def test_zero_copy_threaded_batch_alignment():
         (b"query3", b"GTAC" * 20),
     ]
 
-    aligner = rammappy.Aligner([(b"contig1", target)], preset=rammappy.Preset.Sr)
+    idx = rammappy.Index.build([(b"contig1", target)])
+    aligner = rammappy.Aligner(idx, preset=rammappy.Preset.Sr)
     
     # Call map_batch which drops the GIL and processes in parallel via rayon
     batch_results = aligner.map_batch(queries)
