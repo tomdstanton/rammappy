@@ -50,6 +50,7 @@ def test_cigar_operations():
     mappings = list(aligner.map(b"query", query))
     assert len(mappings) > 0
     first = mappings[0]
+    assert first is not None
     cigar_ops = first.cigar_ops
     assert cigar_ops is not None
 

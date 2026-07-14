@@ -47,6 +47,18 @@ wheels = [
 ]
 
 [[package]]
+name = "catppuccin-zensical"
+version = "0.2.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "zensical" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/05/99/b9d7b5c68392c78b27291d048066417c3c73855ea3c18ed9102bdc1e689e/catppuccin_zensical-0.2.3.tar.gz", hash = "sha256:a203cfa00e332120770fc0999fb9018ff0e9fdcde7f3c47134c99f809462ca41", size = 5665, upload-time = "2026-07-09T14:54:35.689Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ad/4e/71d97a3ee79f38f0642716bab6766238076735262f8631e778e1a7ab1e22/catppuccin_zensical-0.2.3-py3-none-any.whl", hash = "sha256:1550324adcdee55a34097838e4da06e2089253f133f15c2539840169ae031b2e", size = 7763, upload-time = "2026-07-09T14:54:34.72Z" },
+]
+
+[[package]]
 name = "click"
 version = "8.4.2"
 source = { registry = "https://pypi.org/simple" }
@@ -717,6 +729,7 @@ bench = [
 ]
 dev = [
     { name = "black" },
+    { name = "catppuccin-zensical" },
     { name = "mappy" },
     { name = "maturin" },
     { name = "mkdocstrings", extra = ["python"] },
@@ -728,6 +741,7 @@ dev = [
     { name = "zensical" },
 ]
 docs = [
+    { name = "catppuccin-zensical" },
     { name = "mkdocstrings", extra = ["python"] },
     { name = "zensical" },
 ]
@@ -745,6 +759,7 @@ bench = [
 ]
 dev = [
     { name = "black", specifier = ">=25.11.0" },
+    { name = "catppuccin-zensical", specifier = ">=0.2.3" },
     { name = "mappy" },
     { name = "maturin", specifier = ">=1.5,<2.0" },
     { name = "mkdocstrings", extras = ["python"] },
@@ -756,6 +771,7 @@ dev = [
     { name = "zensical", specifier = ">=0.0.29" },
 ]
 docs = [
+    { name = "catppuccin-zensical", specifier = ">=0.2.3" },
     { name = "mkdocstrings", extras = ["python"] },
     { name = "zensical", specifier = ">=0.0.29" },
 ]

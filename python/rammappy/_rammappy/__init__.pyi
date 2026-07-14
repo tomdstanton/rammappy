@@ -9,6 +9,7 @@ import typing
 
 __all__ = [
     "Aligner",
+    "CigarElement",
     "CigarOp",
     "FastxReader",
     "Index",
@@ -168,19 +169,19 @@ class Aligner:
         """
 
 @typing.final
-class CigarOp:
+class CigarElement:
     r"""
-    Structured CIGAR operation (length and operation type).
+    Structured CIGAR operation element (length and operation type).
 
     Attributes:
         len (int): Operation length.
-        op (str): Operation type character (M, I, D, N, S, H, =, X).
+        op (CigarOp): Operation type enum.
     """
 
     @property
     def len(self) -> builtins.int: ...
     @property
-    def op(self) -> builtins.str: ...
+    def op(self) -> CigarOp: ...
 
 @typing.final
 class FastxReader:
@@ -353,7 +354,7 @@ class Mapping:
         edit_distance (int): Edit distance (NM tag).
         divergence (float): Sequence divergence (0.0 = identical).
         cigar (bytes | None): The CIGAR string, if requested during alignment.
-        cigar_ops (list[CigarOp] | None): Structured CIGAR operations, if requested.
+        cigar_ops (list[CigarElement] | None): Structured CIGAR operations, if requested.
         cs (bytes | None): CS tag string, if requested.
         md (bytes | None): MD tag string, if requested.
     """
@@ -405,7 +406,7 @@ class Mapping:
         """
 
     @property
-    def cigar_ops(self) -> typing.Optional[builtins.list[CigarOp]]:
+    def cigar_ops(self) -> typing.Optional[builtins.list[CigarElement]]:
         r"""
         Returns the structured CIGAR operations.
         """
@@ -567,6 +568,25 @@ class SyncmerSketcher:
         Returns:
             list[Minimizer]: A list of syncmer objects.
         """
+
+@typing.final
+class CigarOp(enum.IntEnum):
+    r"""
+    BAM CIGAR operation encodings as a Python Enum.
+
+    The values correspond to the official BAM specification.
+    """
+
+    M = ...
+    I = ...
+    D = ...
+    N = ...
+    S = ...
+    H = ...
+    P = ...
+    EQ = ...
+    X = ...
+    B = ...
 
 @typing.final
 class Preset(enum.Enum):

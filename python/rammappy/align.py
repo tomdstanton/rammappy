@@ -1,7 +1,7 @@
 from ._rammappy import (
     Aligner,
-    CigarOp,
     CigarElement,
+    CigarOp,
     Index,
     Mapping,
     MappingIterator,

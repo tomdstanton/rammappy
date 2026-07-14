@@ -13,7 +13,8 @@ install:
     uv venv --allow-existing
     uv pip install -e .
     cargo run --bin stub_gen --no-default-features
-    uv run python -c "f = 'python/rammappy/_rammappy/__init__.pyi'; content = open(f).read(); open(f, 'w').write(content.replace('_rammappy.Mapping', 'Mapping'))"
+    uv run python -c "f = 'python/rammappy/_rammappy/__init__.pyi'; content = open(f).read(); open(f, 'w').write(content.replace('_rammappy.Mapping', 'Mapping').replace('class CigarOp(enum.Enum):', 'class CigarOp(enum.IntEnum):'))"
+    uv run black python/rammappy/_rammappy/__init__.pyi
 
 
 # Build the Rust extension in release mode

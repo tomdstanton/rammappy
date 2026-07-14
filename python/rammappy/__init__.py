@@ -3,8 +3,8 @@ from . import align, io, sketch
 # Re-export common classes for convenience
 from .align import (
     Aligner,
-    CigarOp,
     CigarElement,
+    CigarOp,
     Index,
     Mapping,
     MappingIterator,
