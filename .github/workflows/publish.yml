@@ -46,5 +46,7 @@ jobs:
           pattern: wheels-*
           path: dist
           merge-multiple: true
+      - name: Remove unsupported linux wheels
+        run: rm -f dist/*-linux_*.whl
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
