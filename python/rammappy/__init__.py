@@ -4,6 +4,7 @@ from . import align, io, sketch
 from .align import (
     Aligner,
     CigarOp,
+    CigarElement,
     Index,
     Mapping,
     MappingIterator,
@@ -23,6 +24,7 @@ __all__ = [
     "MappingIterator",
     "Strand",
     "CigarOp",
+    "CigarElement",
     "Index",
     "FastxReader",
     "Minimizer",

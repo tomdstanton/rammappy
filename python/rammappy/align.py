@@ -1,6 +1,7 @@
 from ._rammappy import (
     Aligner,
     CigarOp,
+    CigarElement,
     Index,
     Mapping,
     MappingIterator,
@@ -8,4 +9,4 @@ from ._rammappy import (
     Strand,
 )
 
-__all__ = ["Aligner", "Preset", "Mapping", "MappingIterator", "Strand", "CigarOp", "Index"]
+__all__ = ["Aligner", "Preset", "Mapping", "MappingIterator", "Strand", "CigarOp", "CigarElement", "Index"]

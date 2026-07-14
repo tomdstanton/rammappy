@@ -77,24 +77,61 @@ impl From<Strand> for RustStrand {
     }
 }
 
-/// Structured CIGAR operation (length and operation type).
+/// BAM CIGAR operation encodings as a Python Enum.
+/// 
+/// The values correspond to the official BAM specification.
+#[gen_stub_pyclass_enum]
+#[pyclass(eq, eq_int, module = "rammappy._rammappy")]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum CigarOp {
+    M = 0,
+    I = 1,
+    D = 2,
+    N = 3,
+    S = 4,
+    H = 5,
+    P = 6,
+    EQ = 7,
+    X = 8,
+    B = 9,
+}
+
+impl From<u8> for CigarOp {
+    fn from(op: u8) -> Self {
+        match op {
+            0 => CigarOp::M,
+            1 => CigarOp::I,
+            2 => CigarOp::D,
+            3 => CigarOp::N,
+            4 => CigarOp::S,
+            5 => CigarOp::H,
+            6 => CigarOp::P,
+            7 => CigarOp::EQ,
+            8 => CigarOp::X,
+            9 => CigarOp::B,
+            _ => CigarOp::M,
+        }
+    }
+}
+
+/// Structured CIGAR operation element (length and operation type).
 ///
 /// Attributes:
 ///     len (int): Operation length.
-///     op (str): Operation type character (M, I, D, N, S, H, =, X).
+///     op (CigarOp): Operation type enum.
 #[gen_stub_pyclass]
 #[pyclass(module = "rammappy._rammappy", get_all, from_py_object)]
 #[derive(Clone)]
-pub struct CigarOp {
+pub struct CigarElement {
     pub len: u32,
-    pub op: String,
+    pub op: CigarOp,
 }
 
-impl From<RustCigarOp> for CigarOp {
+impl From<RustCigarOp> for CigarElement {
     fn from(op: RustCigarOp) -> Self {
-        CigarOp {
+        CigarElement {
             len: op.len,
-            op: op.op_char().to_string(),
+            op: op.op.into(),
         }
     }
 }
@@ -124,7 +161,7 @@ impl From<RustCigarOp> for CigarOp {
 ///     edit_distance (int): Edit distance (NM tag).
 ///     divergence (float): Sequence divergence (0.0 = identical).
 ///     cigar (bytes | None): The CIGAR string, if requested during alignment.
-///     cigar_ops (list[CigarOp] | None): Structured CIGAR operations, if requested.
+///     cigar_ops (list[CigarElement] | None): Structured CIGAR operations, if requested.
 ///     cs (bytes | None): CS tag string, if requested.
 ///     md (bytes | None): MD tag string, if requested.
 #[gen_stub_pyclass]
@@ -206,7 +243,7 @@ impl Mapping {
 
     /// Returns the structured CIGAR operations.
     #[getter]
-    fn cigar_ops(&self) -> Option<Vec<CigarOp>> {
+    fn cigar_ops(&self) -> Option<Vec<CigarElement>> {
         self.inner.cigar_ops.as_ref().map(|ops| ops.iter().map(|&op| op.into()).collect())
     }
 
@@ -660,6 +697,7 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     if let Err(e) = m.add_class::<Preset>() { println!("Error adding Preset: {:?}", e); return Err(e); }
     if let Err(e) = m.add_class::<Strand>() { println!("Error adding Strand: {:?}", e); return Err(e); }
     if let Err(e) = m.add_class::<CigarOp>() { println!("Error adding CigarOp: {:?}", e); return Err(e); }
+    if let Err(e) = m.add_class::<CigarElement>() { println!("Error adding CigarElement: {:?}", e); return Err(e); }
     if let Err(e) = m.add_class::<Index>() { println!("Error adding Index: {:?}", e); return Err(e); }
     if let Err(e) = m.add_class::<Aligner>() { println!("Error adding Aligner: {:?}", e); return Err(e); }
     if let Err(e) = m.add_class::<Mapping>() { println!("Error adding Mapping: {:?}", e); return Err(e); }
