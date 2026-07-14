@@ -18,6 +18,14 @@ nav = [
  # { "Performance & Benchmarks" = "benchmarks.md" },
 ]
 
+[[extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/tomdstanton/rammappy"
+
+[[extra.social]]
+icon = "fontawesome/brands/python"
+link = "https://pypi.org/project/rammappy/"
+
 [theme]
 name = "catppuccin"
 icon.repo = "fontawesome/brands/github"
