@@ -1,14 +1,14 @@
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pymethods};
-use rammap::align::sketch::{Sketcher, MinimizerSketcher as RustMinimizerSketcher};
-use rammap::align::syncmer::SyncmerSketcher as RustSyncmerSketcher;
+use rammap::align::sketch::{MinimizerSketcher as RustMinimizerSketcher, Sketcher};
 use rammap::align::strobemer::RandstrobeSketcher as RustRandstrobeSketcher;
+use rammap::align::syncmer::SyncmerSketcher as RustSyncmerSketcher;
 
 /// Represents a k-mer sketch (minimizer, syncmer, etc.).
-/// 
+///
 /// Contains the genomic coordinate and the hash value.
-/// 
+///
 /// Attributes:
 ///     x (int): The 64-bit integer combining the genomic coordinate and other metadata.
 ///     y (int): The 64-bit hash value of the k-mer.
@@ -25,7 +25,7 @@ pub struct Minimizer {
 /// A sketcher that extracts minimizers from sequences.
 ///
 /// Minimizers are the lexicographically smallest k-mers in a sliding window of size w.
-/// 
+///
 /// Examples:
 ///     >>> from rammappy.sketch import MinimizerSketcher
 ///     >>> sketcher = MinimizerSketcher(k=15, w=10)
@@ -33,7 +33,9 @@ pub struct Minimizer {
 ///     [<Minimizer object at ...>, ...]
 #[gen_stub_pyclass]
 #[pyclass(module = "rammappy._rammappy")]
-pub struct MinimizerSketcher { inner: RustMinimizerSketcher }
+pub struct MinimizerSketcher {
+    inner: RustMinimizerSketcher,
+}
 
 #[gen_stub_pymethods]
 #[pymethods]
@@ -48,9 +50,15 @@ impl MinimizerSketcher {
     ///     MinimizerSketcher: The initialized sketcher.
     #[new]
     pub fn new(k: usize, w: usize) -> Self {
-        Self { inner: RustMinimizerSketcher { k, w, is_hpc: false } }
+        Self {
+            inner: RustMinimizerSketcher {
+                k,
+                w,
+                is_hpc: false,
+            },
+        }
     }
-    
+
     /// Extract minimizers from a byte string sequence.
     ///
     /// Args:
@@ -62,7 +70,9 @@ impl MinimizerSketcher {
         let seq_bytes = seq.as_bytes();
         let mut out = Vec::new();
         self.inner.sketch(seq_bytes, seq_bytes.len(), 0, &mut out);
-        out.into_iter().map(|m| Minimizer { x: m.x, y: m.y }).collect()
+        out.into_iter()
+            .map(|m| Minimizer { x: m.x, y: m.y })
+            .collect()
     }
 }
 
@@ -77,7 +87,9 @@ impl MinimizerSketcher {
 ///     [<Minimizer object at ...>, ...]
 #[gen_stub_pyclass]
 #[pyclass(module = "rammappy._rammappy")]
-pub struct SyncmerSketcher { inner: RustSyncmerSketcher }
+pub struct SyncmerSketcher {
+    inner: RustSyncmerSketcher,
+}
 
 #[gen_stub_pymethods]
 #[pymethods]
@@ -92,9 +104,11 @@ impl SyncmerSketcher {
     ///     SyncmerSketcher: The initialized sketcher.
     #[new]
     fn new(k: usize, s: usize) -> Self {
-        Self { inner: RustSyncmerSketcher::new(k, s) }
+        Self {
+            inner: RustSyncmerSketcher::new(k, s),
+        }
     }
-    
+
     /// Extract syncmers from a byte string sequence.
     ///
     /// Args:
@@ -106,7 +120,9 @@ impl SyncmerSketcher {
         let seq_bytes = seq.as_bytes();
         let mut out = Vec::new();
         self.inner.sketch(seq_bytes, seq_bytes.len(), 0, &mut out);
-        out.into_iter().map(|m| Minimizer { x: m.x, y: m.y }).collect()
+        out.into_iter()
+            .map(|m| Minimizer { x: m.x, y: m.y })
+            .collect()
     }
 }
 
@@ -121,7 +137,9 @@ impl SyncmerSketcher {
 ///     [<Minimizer object at ...>, ...]
 #[gen_stub_pyclass]
 #[pyclass(module = "rammappy._rammappy")]
-pub struct RandstrobeSketcher { inner: RustRandstrobeSketcher }
+pub struct RandstrobeSketcher {
+    inner: RustRandstrobeSketcher,
+}
 
 #[gen_stub_pymethods]
 #[pymethods]
@@ -137,9 +155,11 @@ impl RandstrobeSketcher {
     ///     RandstrobeSketcher: The initialized sketcher.
     #[new]
     fn new(k: usize, w_min: usize, w_max: usize) -> Self {
-        Self { inner: RustRandstrobeSketcher::new(k, w_min, w_max) }
+        Self {
+            inner: RustRandstrobeSketcher::new(k, w_min, w_max),
+        }
     }
-    
+
     /// Extract randstrobes from a byte string sequence.
     ///
     /// Args:
@@ -151,14 +171,28 @@ impl RandstrobeSketcher {
         let seq_bytes = seq.as_bytes();
         let mut out = Vec::new();
         self.inner.sketch(seq_bytes, seq_bytes.len(), 0, &mut out);
-        out.into_iter().map(|m| Minimizer { x: m.x, y: m.y }).collect()
+        out.into_iter()
+            .map(|m| Minimizer { x: m.x, y: m.y })
+            .collect()
     }
 }
 
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    if let Err(e) = m.add_class::<Minimizer>() { println!("Error adding Minimizer: {:?}", e); return Err(e); }
-    if let Err(e) = m.add_class::<MinimizerSketcher>() { println!("Error adding MinimizerSketcher: {:?}", e); return Err(e); }
-    if let Err(e) = m.add_class::<SyncmerSketcher>() { println!("Error adding SyncmerSketcher: {:?}", e); return Err(e); }
-    if let Err(e) = m.add_class::<RandstrobeSketcher>() { println!("Error adding RandstrobeSketcher: {:?}", e); return Err(e); }
+    if let Err(e) = m.add_class::<Minimizer>() {
+        println!("Error adding Minimizer: {:?}", e);
+        return Err(e);
+    }
+    if let Err(e) = m.add_class::<MinimizerSketcher>() {
+        println!("Error adding MinimizerSketcher: {:?}", e);
+        return Err(e);
+    }
+    if let Err(e) = m.add_class::<SyncmerSketcher>() {
+        println!("Error adding SyncmerSketcher: {:?}", e);
+        return Err(e);
+    }
+    if let Err(e) = m.add_class::<RandstrobeSketcher>() {
+        println!("Error adding RandstrobeSketcher: {:?}", e);
+        return Err(e);
+    }
     Ok(())
 }

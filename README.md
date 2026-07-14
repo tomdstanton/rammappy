@@ -7,9 +7,15 @@
 [![ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
-> [!WARNING]
-> This library is still a work-in-progress, and in an experimental stage, with API breaks very likely between minor versions.
+    
+<div class="markdown-alert markdown-alert-warning" style="padding: 1rem; margin-bottom: 1rem; border-left: 0.25rem solid #e3b341; background-color: rgba(227, 179, 65, 0.1); border-radius: 6px;">
+  <p style="font-weight: 600; margin-top: 0; margin-bottom: 0.5rem; display: flex; align-items: center; color: #e3b341;">
+    ⚠️ Warning
+  </p>
+  <p style="margin-bottom: 0; color: inherit;">
+    This library is still a work-in-progress, and in an experimental stage, with API breaks very likely between minor versions.
+  </p>
+</div>
 
 ---
 
@@ -30,8 +36,8 @@ It directly links to the [`rammap-core`](https://crates.io/crates/rammap-core) c
 
 If you are building from source or working on development, we prefer using `uv` for environment and dependency management, along with `just` as a command runner:
 
-```sh
-$ just install
+```console
+just install
 ```
 
 *(This command wraps `uv venv --allow-existing` and `uv pip install -e .`)*

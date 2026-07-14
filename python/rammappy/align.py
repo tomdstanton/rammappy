@@ -9,4 +9,13 @@ from ._rammappy import (
     Strand,
 )
 
-__all__ = ["Aligner", "Preset", "Mapping", "MappingIterator", "Strand", "CigarOp", "CigarElement", "Index"]
+__all__ = [
+    "Aligner",
+    "Preset",
+    "Mapping",
+    "MappingIterator",
+    "Strand",
+    "CigarOp",
+    "CigarElement",
+    "Index",
+]

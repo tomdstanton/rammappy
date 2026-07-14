@@ -39,7 +39,7 @@ PyPI = "https://pypi.org/project/rammappy"
 
 [dependency-groups]
 test = ["pytest", "pytest-cov"]
-docs = ["zensical>=0.0.29", "mkdocstrings[python]", "catppuccin-zensical"]
+docs = ["zensical>=0.0.29", "mkdocstrings[python]"]
 bench = ["mappy", "pytest-benchmark>=5.2.3"]
 dev = [
     "black>=25.11.0", 
