@@ -63,7 +63,7 @@ admonition = {}
 "pymdownx.arithmatex" = { generic = true }
 toc = { permalink = true, title = "On this page" }
 footnotes = {}
-[pymdownx.superfences]
+[markdown_extensions."pymdownx.superfences"]
 custom_fences = [
   { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
 ]
