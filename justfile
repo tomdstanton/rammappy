@@ -57,7 +57,7 @@ ci: lint test
 
 # Build production wheels
 build-wheels:
-    uv run maturin build --release
+    uvx maturin build --release
 
 # Set version in Cargo.toml (useful in CI to sync with git tag)
 set-version VERSION:
@@ -65,7 +65,7 @@ set-version VERSION:
 
 # Publish to PyPI
 publish: build-wheels
-    uv run maturin upload target/wheels/*
+    uvx maturin upload target/wheels/*
 
 # --- Documentation ---
 

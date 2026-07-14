@@ -45,6 +45,7 @@ dev = [
     "black>=25.11.0", 
     "ruff>=0.15.21", 
     "ty>=0.0.59", 
+    "maturin>=1.5,<2.0",
     {include-group = "test"}, 
     {include-group = "docs"},
     {include-group = "bench"},
