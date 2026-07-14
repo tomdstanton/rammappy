@@ -17,6 +17,11 @@ nav = [
     ] },
  # { "Performance & Benchmarks" = "benchmarks.md" },
 ]
+language = "en"
+copyright = """
+Copyright &copy; 2026 <a href="https://tomdstanton.com" target="_blank">Tom Stanton</a>
+"""
+
 
 [[extra.social]]
 icon = "fontawesome/brands/github"
