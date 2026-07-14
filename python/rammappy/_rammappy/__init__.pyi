@@ -370,13 +370,10 @@ class Mapping:
 @typing.final
 class MappingIterator:
     r"""
-    A lazy iterator that yields `Mapping` objects.
+    A lazy iterator that provides `Mapping` objects.
     
     Instead of allocating a list, we hold an iterator of Rust mappings 
     and materialize Python wrapper objects only when requested via `next()`.
-    
-    Yields:
-        Mapping: The next alignment mapping.
     """
     def __iter__(self) -> MappingIterator: ...
     def __next__(self) -> typing.Optional[Mapping]: ...

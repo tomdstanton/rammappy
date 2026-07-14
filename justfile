@@ -10,7 +10,7 @@ default:
 
 # Install dependencies, build the extension in development mode, and generate python stubs
 install:
-    uv venv
+    uv venv --allow-existing
     uv pip install -e .
     cargo run --bin stub_gen --no-default-features
     uv run python -c "f = 'python/rammappy/_rammappy/__init__.pyi'; content = open(f).read(); open(f, 'w').write(content.replace('_rammappy.Mapping', 'Mapping'))"
@@ -18,7 +18,7 @@ install:
 
 # Build the Rust extension in release mode
 build:
-    uv venv
+    uv venv --allow-existing
     uv pip install -e .
 
 # Run the test suite
