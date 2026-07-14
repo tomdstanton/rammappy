@@ -7,17 +7,20 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
 
+> [!WARNING]
+> This library is still a work-in-progress, and in an experimental stage, with API breaks very likely between minor versions.
+
+---
+
 ## 🗺️ Overview
 
-`minimap2` is a widely used mapping tool for nucleotide sequences. `rammap`[\[1\]](#ref1) is a reimplementation of minimap2 in Rust, demonstrating perfect concordance while enabling performance optimizations for modern architectures. It maintains Rust's stronger memory safety constraints and provides a modular architecture.
+`minimap2` is a widely used mapping tool for nucleotide sequences. `rammap`[^1] is a reimplementation of minimap2 in Rust, demonstrating perfect concordance while enabling performance optimizations for modern architectures. It maintains Rust's stronger memory safety constraints and provides a modular architecture.
 
 `rammappy` is a Python module, implemented using the [PyO3](https://pyo3.rs/) framework, that provides bindings to `rammap`. It directly links to the `rammap-core` code, which provides the following advantages:
 
 - **zero-copy**: Sequences are passed around as contiguous blocks of C-memory storing the byte sequences.
 - **multithreaded**: True parallel alignment inside a detached thread context that completely drops the Python GIL during batch processing.
 - **lazy evaluation**: Iterator-based result generation ensures massive mapping tasks don't blow up system memory.
-
-*This library is still a work-in-progress, and in an experimental stage, with API breaks very likely between minor versions.*
 
 ## 🔧 Installing
 
@@ -30,23 +33,39 @@ $ just install
 ```
 *(This command wraps `uv venv --allow-existing` and `uv pip install -e .`)*
 
-## 🔖 Citation
-
-`rammappy` is scientific software and builds on top of `rammap`. Please cite `rammap` if you are using it in an academic work:
-
-> `rammappy`, a Python library binding to `rammap` (Wang & Li, 2026).
 
 ## 💡 Examples
 
-### 🔨 Instantiating an Aligner
+### 🧠 Building an Index In-Memory
 
-You can create an aligner by providing a list of target sequences (contigs) and a preset configuration. It accepts Python `bytes` directly.
+A significant advantage of `rammappy` over `mappy` (the official minimap2 Python bindings) is the ability to build an `Index` directly from in-memory sequences. In `mappy`, reference sequences must generally be read from a FASTA file on disk. `rammappy` allows you to skip the disk I/O entirely:
 
 ```python
 import rammappy
 
-target = b"ACGT" * 100
-aligner = rammappy.Aligner([(b"contig1", target)], preset=rammappy.Preset.Sr)
+# Define reference sequences
+refs = [
+    (b"chr1", b"ACGT" * 1000),
+    (b"chr2", b"TGCA" * 1000)
+]
+
+# Build the index completely in-memory
+index = rammappy.Index.build(refs, k=15, w=10)
+
+# Optionally save it for later use
+index.save("reference.mmi")
+
+# You can also fetch sequences directly from the index!
+print(index.seq("chr1", start=0, end=10))
+```
+
+### 🔨 Instantiating an Aligner
+
+You can create an aligner by providing the built index and a preset configuration.
+
+```python
+# Pass the in-memory index directly to the Aligner
+aligner = rammappy.Aligner(index, preset=rammappy.Preset.Sr)
 ```
 
 ### 🔬 Batch Alignment
@@ -95,6 +114,9 @@ graph TD
 ### Zero-Copy Evaluation Using `bytes`
 Python strings (`str`) perform computationally expensive UTF-8 allocations and validation mechanisms. `rammappy` universally prefers Python byte-strings (`bytes` in Python, mapped to `&[u8]` in Rust). Data entering the alignment algorithm uses `Bound<'py, PyBytes>`, mapping directly to contiguous blocks of C-memory storing the sequences. Retrieving genomic strings mapping fields (e.g., CIGAR/MD/CS strings) exposes byte payloads directly without additional UTF-8 reallocations during FFI crossings.
 
+### In-Memory Indexing vs Disk I/O
+Traditional bindings like `mappy` force users to write target sequences to a FASTA file before an index can be built and queried. `rammappy` decouples the `Index` from the `Aligner`, allowing indexes to be built dynamically from raw memory bytes inside Python, completely eliminating disk I/O bottlenecks for dynamic or programmatic reference generation.
+
 ### Parallel Scaling and the Python GIL
 Scaling genomic query alignments in parallel on multi-core systems mandates threading. However, the presence of the Python Global Interpreter Lock (GIL) poses problems, as normal PyO3 structures retain a lock on the main Python thread.
 
@@ -104,10 +126,12 @@ We collect batches of targets mapped to pointers and lengths. We wrap these repr
 ### Lazy Materialization
 Rather than computing alignment lists as heavy `Vec<Mapping>` aggregates and immediately converting every hit to a Python-native object (costing heavy FFI time), `rammappy` returns a `MappingIterator`. A `MappingIterator` acts as an opaque handle holding the vector of internal `RustMapping` entries. Only when a user invokes `next(iterator)` is the memory read and a single Python `Mapping` object initialized and surfaced over the FFI boundary.
 
+---
+
 ## 👏 Acknowledgments
 
 We would like to thank the original authors of `rammap`, Jeremy R. Wang and Heng Li, for their high-performance reimplementation of minimap2 in Rust.
 
 ## 📚 References
 
-- <a id="ref1">\[1\]</a> Jeremy R. Wang and Heng Li. Memory-safe high-performance sequence mapping with rammap (2026). bioRxiv. [10.64898/2026.05.26.726289](https://doi.org/10.64898/2026.05.26.726289).
+[^1]: Jeremy R. Wang and Heng Li. Memory-safe high-performance sequence mapping with rammap (2026). bioRxiv. [10.64898/2026.05.26.726289](https://doi.org/10.64898/2026.05.26.726289).

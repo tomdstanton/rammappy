@@ -3,7 +3,7 @@
 First off, thank you for considering contributing to `rammappy`! It's people like you that make open-source bioinformatics
 tools better for the entire community.
 
-Whether you are fixing a bug, improving the Hidden Markov Model performance, adding a new feature, or simply correcting
+Whether you are fixing a bug, improving alignment performance, adding a new feature, or simply correcting
 a typo in the documentation, your help is welcome.
 
 ## Table of Contents
@@ -31,7 +31,7 @@ We use GitHub Issues to track bugs and feature requests.
 * **Bugs:** Please provide a clear description of the issue, the expected behavior, and ideally, a minimal reproducible
 example (including a small sample FASTA file if applicable).
 
-* **Features:** Explain the feature, why it would be useful for metagenomics workflows, and how it should work.
+* **Features:** Explain the feature, why it would be useful for sequence mapping workflows, and how it should work.
 
 ## Local Development Setup
 
@@ -58,32 +58,24 @@ Create a new branch for your feature or bugfix:
 git checkout -b feature/my-new-feature
 ```
 
-Install the project in editable mode with all development dependencies. uv will automatically compile the Rust
-extensions and set up your virtual environment:
+Use our `just` task runner to install the project in editable mode, compile the Rust extensions, build Python stubs, and set up your virtual environment:
 
 ```console
-uv pip install -e ".[dev,docs]"
+just install
 ```
 
-(Note: Whenever you make changes to the .rs files in the src/ directory, you will need to re-run the uv pip install
-command to recompile the PyO3 bindings).
+(Note: Whenever you make changes to the `.rs` files in the `src/` directory, you will need to re-run the `just install`
+command to recompile the PyO3 bindings and regenerate the stubs).
 
-## Testing and Benchmarks
+## Testing
 
 We use pytest for our test suite. It is crucial that any new features are covered by unit tests and do not break the
-existing HMM logic.
+existing alignment logic.
 
-To run the standard test suite:
-
-```console
-uv run pytest
-```
-
-If you are modifying core algorithms and want to see how your changes impact prediction speed, you can run the
-benchmark suite:
+To run the standard test suite, use the `just` task runner:
 
 ```console
-uv run pytest dev/bench/
+just test
 ```
 
 ## Building the Documentation
@@ -91,17 +83,17 @@ uv run pytest dev/bench/
 Our documentation is built using Zensical. The site is automatically deployed via GitHub Actions, but you should
 preview your changes locally before submitting a PR.
 
-Make your changes to the Markdown files in the `docs/` directory or update the Python docstrings.
+Make your changes to the `README.md` or `CONTRIBUTING.md` files in the root directory (they will be copied to `docs/` automatically during the build), or update the Python docstrings.
 
 Start the local live-reloading server:
 
 ```console
-uv run zensical serve
+just docs
 ```
 
 Open http://localhost:8000 in your browser.
 
-(Note: Do not commit the `site/` or `docs/benchmarks/` directories to version control).
+(Note: Do not commit the `site/`, `docs/index.md`, or `docs/contributing.md` files to version control as they are generated dynamically).
 
 ## Submitting a Pull Request
 When you are ready to share your code:
