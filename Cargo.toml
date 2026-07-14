@@ -4,11 +4,20 @@ version = "0.1.0"
 edition = "2024"
 
 [lib]
-name = "rammappy"
-crate-type = ["cdylib"]
+name = "_rammappy"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["extension-module"]
+extension-module = ["pyo3/extension-module"]
 
 [dependencies]
-pyo3 = { version = "0.29.0", features = ["extension-module"] }
+pyo3 = { version = "0.29.0" }
 pyo3-stub-gen = "0.23.0"
 rammap-core = "1.1.1"
 rayon = "1.10"
+
+[[bin]]
+name = "stub_gen"
+path = "src/bin/stub_gen.rs"
+required-features = []

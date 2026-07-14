@@ -1,6 +1,17 @@
-# rammappy
+# 🔗🐍🧬 Rammappy [![Stars](https://img.shields.io/github/stars/tomdstanton/rammappy.svg?style=social&maxAge=3600&label=Star)](https://github.com/tomdstanton/rammappy/stargazers)
+*A Python interface to [rammap](https://github.com/jwanglab/rammap), the Rust implementation of minimap2*
 
-High-performance, zero-copy Python bindings for `rammap-core`, a bare-metal Rust genomic sequence aligner. 
+[![Release](https://img.shields.io/github/v/release/tomdstanton/rammappy?style=flat-square)](https://img.shields.io/github/v/release/tomdstanton/rammappy)
+[![License](https://img.shields.io/github/license/tomdstanton/rammappy?style=flat-square)](https://img.shields.io/github/license/tomdstanton/rammappy)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19059429.svg?style=flat-square)](https://doi.org/10.5281/zenodo.19059429)
+[![PyPI](https://img.shields.io/pypi/v/rammappy.svg?style=flat-square&maxAge=3600&logo=PyPI)](https://pypi.org/project/rammappy)
+[![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/tomdstanton/rammappy/)
+[![Issues](https://img.shields.io/github/issues/tomdstanton/rammappy.svg?style=flat-square&maxAge=600)](https://github.com/tomdstanton/rammappy/issues)
+[![Downloads](https://img.shields.io/pypi/dm/rammappy?style=flat-square&color=303f9f&maxAge=86400&label=downloads)](https://pepy.tech/project/rammappy)
+
+---
+
+## Introduction
 
 `rammappy` is designed with a focus on speed, lazy evaluation, and parallel processing. It is built using [PyO3](https://github.com/PyO3/pyo3) and the [Maturin](https://github.com/PyO3/maturin) build backend.
 

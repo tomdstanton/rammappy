@@ -1,39 +1,99 @@
+[project]
+name = "rammappy"
+description = "A Python interface to rammap, the Rust implementation of minimap2"
+requires-python = ">=3.10"
+dependencies = []
+license = {file = "LICENSE"}
+dynamic = ["version"]
+authors = [{ name = "Tom Stanton", email = "tomdstanton@gmail.com" }]
+readme = {file = "README.md", content-type = "text/markdown"}
+keywords = ["bioinformatics", "sequence-alignment", "spliced-alignment", "genomics"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://tomdstanton.github.io/rammappy/"
+Repository = "https://github.com/tomdstanton/rammappy"
+Documentation = "https://tomdstanton.github.io/rammappy/"
+"Bug Tracker" = "https://github.com/tomdstanton/rammappy/issues"
+Coverage = "https://codecov.io/gh/tomdstanton/rammappy/"
+Builds = "https://github.com/tomdstanton/rammappy/actions"
+PyPI = "https://pypi.org/project/rammappy"
+
+[dependency-groups]
+test = ["pytest", "pytest-cov"]
+docs = ["zensical>=0.0.29", "mkdocstrings[python]"]
+bench = ["mappy", "pytest-benchmark>=5.2.3"]
+dev = [
+    "black>=25.11.0", 
+    "ruff>=0.15.21", 
+    "ty>=0.0.59", 
+    {include-group = "test"}, 
+    {include-group = "docs"},
+    {include-group = "bench"},
+]
+
 [build-system]
 requires = ["maturin>=1.5,<2.0"]
 build-backend = "maturin"
 
-[project]
-name = "rammappy"
-version = "0.1.0"
-description = "High-performance, zero-copy Python bindings for rammap (minimap2 Rust rewrite)"
-authors = [
-    { name = "rammappy developers" }
-]
-requires-python = ">=3.9"
-readme = "README.md"
-classifiers = [
-    "Programming Language :: Rust",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
-]
-dependencies = []
-
 [tool.maturin]
 features = ["pyo3/extension-module"]
-module-name = "rammappy"
+python-source = "python"
+module-name = "rammappy._rammappy"
 profile = "release"
 
-[tool.uv]
+[tool.black]
+line-length = 100
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.egg
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.nox
+  | \.tox
+  | \.venv
+  | \venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | setup.py
+)/
+'''
 
-[dependency-groups]
-dev = [
-    "black>=25.11.0",
-    "mypy>=1.19.1",
-    "pdoc>=15.0.4",
-    "pytest>=8.0.0",
-    "ruff>=0.15.21",
-    "ty>=0.0.59",
-]
-# Modern Astral uv configuration
-# This allows 'uv pip install -e .' or 'uv run' to seamlessly build and manage
-# the workspace using maturin under the hood.
+[tool.ty]
+# Typecheck everything and disallow untyped definitions by enabling strict checks
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "I001", "T201", "T203"]
+ignore = ["E501"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+fix = true
+exclude = ["scratch_benchmark.py", "*.pyi"]

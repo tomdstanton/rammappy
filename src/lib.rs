@@ -12,7 +12,7 @@ use rammap::align::strobemer::RandstrobeSketcher as RustRandstrobeSketcher;
 /// We #[derive(Clone)] so it can be returned easily as a vector to Python.
 /// The attributes `x` and `y` are directly exposed as read-only properties to avoid Python getter overhead.
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct Minimizer {
     #[pyo3(get)]
@@ -317,7 +317,7 @@ define_stub_info_gatherer!(stub_info);
 
 /// The core PyO3 module initialization sequence. 
 #[pymodule]
-fn rammappy(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _rammappy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     if let Err(e) = m.add_class::<Preset>() { println!("Error adding Preset: {:?}", e); return Err(e); }
     if let Err(e) = m.add_class::<Aligner>() { println!("Error adding Aligner: {:?}", e); return Err(e); }
     if let Err(e) = m.add_class::<Mapping>() { println!("Error adding Mapping: {:?}", e); return Err(e); }

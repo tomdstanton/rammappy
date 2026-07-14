@@ -1,5 +1,5 @@
-import pytest
 import rammappy
+
 
 def test_minimizer_sketcher():
     seq = b"ACGTACGTACGTACGTACGTACGT"

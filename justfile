@@ -8,14 +8,15 @@ default:
 
 # --- Development ---
 
-# Install dependencies and build the extension in development mode
+# Install dependencies, build the extension in development mode, and generate python stubs
 install:
     uv pip install -e .
+    cargo run --bin stub_gen --no-default-features
 
-# Build the Rust extension in release mode and copy it to the root
+
+# Build the Rust extension in release mode
 build:
-    cargo build --release
-    cp target/release/librammappy.dylib rammappy.so
+    uv pip install -e .
 
 # Run the test suite
 test: install
@@ -44,6 +45,7 @@ lint-rust:
 # Lint Python code
 lint-python:
     uv run ruff check .
+    uv run ty check .
 
 # --- CI & Publishing ---
 
@@ -58,6 +60,22 @@ build-wheels:
 publish: build-wheels
     uv run maturin upload target/wheels/*
 
+# --- Documentation ---
+
+# Build and serve the documentation locally
+docs:
+    mkdir -p docs
+    cp README.md docs/index.md
+    cp CONTRIBUTING.md docs/contributing.md
+    uv run zensical serve
+
+# Test if documentation can be built without warnings or errors
+docs-test:
+    mkdir -p docs
+    cp README.md docs/index.md
+    cp CONTRIBUTING.md docs/contributing.md
+    uv run zensical build -s
+
 # --- Cleanup ---
 
 # Clean build artifacts
@@ -67,4 +85,6 @@ clean:
     rm -f rammappy.so
     rm -rf rammappy
     rm -rf target/wheels
+    rm -rf site
+    rm -f docs/index.md docs/contributing.md
     find . -type d -name "__pycache__" -exec rm -rf {} +

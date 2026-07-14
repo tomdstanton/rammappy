@@ -16,6 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Inject Git tag version into Cargo.toml
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Setting package version to $VERSION"
+          sed -i.bak "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
+          rm -f Cargo.toml.bak
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -41,6 +49,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Inject Git tag version into Cargo.toml
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Setting package version to $VERSION"
+          sed -i.bak "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
+          rm -f Cargo.toml.bak
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
