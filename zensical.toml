@@ -22,7 +22,6 @@ copyright = """
 Copyright &copy; 2026 <a href="https://tomdstanton.com" target="_blank">Tom Stanton</a>
 """
 
-
 [[extra.social]]
 icon = "fontawesome/brands/github"
 link = "https://github.com/tomdstanton/rammappy"
@@ -58,12 +57,16 @@ features = [
 [markdown_extensions]
 admonition = {}
 "pymdownx.details" = {}
-"pymdownx.superfences" = {}
 "pymdownx.tabbed" = { alternate_style = true }
 "pymdownx.highlight" = { anchor_linenums = true, use_pygments = true }
 "pymdownx.inlinehilite" = {}
 "pymdownx.arithmatex" = { generic = true }
-
+toc = { permalink = true, title = "On this page" }
+footnotes = {}
+[pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
+]
 
 [plugins]
 search = {}

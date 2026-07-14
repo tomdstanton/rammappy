@@ -67,7 +67,7 @@ just install
 (Note: Whenever you make changes to the `.rs` files in the `src/` directory, you will need to re-run the `just install`
 command to recompile the PyO3 bindings and regenerate the stubs).
 
-## Testing
+## Testing and Benchmarks
 
 We use pytest for our test suite. It is crucial that any new features are covered by unit tests and do not break the
 existing alignment logic.

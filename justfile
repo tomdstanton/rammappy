@@ -30,6 +30,9 @@ test: install
 # Run all formatters (Rust + Python)
 fmt: fmt-rust fmt-python
 
+# Check formatting without modifying files (useful for CI)
+fmt-check: fmt-check-rust fmt-check-python
+
 # Run all linters (Rust + Python)
 lint: lint-rust lint-python
 
@@ -40,6 +43,14 @@ fmt-rust:
 # Format Python code
 fmt-python:
     uv run black .
+
+# Check Rust formatting
+fmt-check-rust:
+    cargo fmt -- --check
+
+# Check Python formatting
+fmt-check-python:
+    uv run black --check .
 
 # Lint Rust code
 lint-rust:
@@ -52,8 +63,8 @@ lint-python:
 
 # --- CI & Publishing ---
 
-# Run the full CI pipeline locally (format, lint, test)
-ci: lint test
+# Run the full CI pipeline locally (format check, lint, test)
+ci: fmt-check lint test
 
 # Build production wheels
 build-wheels:
