@@ -19,13 +19,18 @@ def test_fastx_reader(tmp_path: Path):
     records = list(reader)
 
     assert len(records) == 2
-    assert records[0].name == "seq1"
-    assert records[0].sequence == b"ACGT"
-    assert records[0].quality is None
 
-    assert records[1].name == "seq2"
-    assert records[1].sequence == b"GGGG"
-    assert records[1].quality is None
+    r0 = records[0]
+    assert r0 is not None
+    assert r0.name == "seq1"
+    assert r0.sequence == b"ACGT"
+    assert r0.quality is None
+
+    r1 = records[1]
+    assert r1 is not None
+    assert r1.name == "seq2"
+    assert r1.sequence == b"GGGG"
+    assert r1.quality is None
 
 
 def test_read_fasta(tmp_path: Path):
