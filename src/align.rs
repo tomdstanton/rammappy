@@ -399,6 +399,7 @@ impl Index {
     #[staticmethod]
     #[pyo3(signature = (seqs, w=10, k=15, is_hpc=false, max_occ=50000))]
     fn build(
+        py: Python<'_>,
         seqs: Vec<(Bound<'_, PyBytes>, Bound<'_, PyBytes>)>,
         w: usize,
         k: usize,
@@ -414,9 +415,8 @@ impl Index {
                 )
             })
             .collect();
-        Index {
-            inner: RustIndex::build(rust_seqs, w, k, is_hpc, max_occ),
-        }
+        let inner = py.detach(move || RustIndex::build(rust_seqs, w, k, is_hpc, max_occ));
+        Index { inner }
     }
 
     /// Load an index from file.
@@ -427,28 +427,27 @@ impl Index {
     /// Returns:
     ///     Index: The loaded index.
     #[staticmethod]
-    fn load(path: PathBuf) -> PyResult<Self> {
+    fn load(py: Python<'_>, path: PathBuf) -> PyResult<Self> {
         let path_str = path
             .to_str()
-            .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?;
-        match RustIndex::load(path_str) {
-            Ok(idx) => Ok(Index { inner: idx }),
-            Err(e) => Err(pyo3::exceptions::PyIOError::new_err(e.to_string())),
-        }
+            .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?
+            .to_string();
+        py.detach(move || RustIndex::load(&path_str))
+            .map(|idx| Index { inner: idx })
+            .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))
     }
 
     /// Save the index to a file.
     ///
     /// Args:
     ///     path (os.PathLike): The file path to save the index to.
-    fn save(&self, path: PathBuf) -> PyResult<()> {
+    fn save(&self, py: Python<'_>, path: PathBuf) -> PyResult<()> {
         let path_str = path
             .to_str()
-            .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?;
-        match self.inner.save(path_str) {
-            Ok(_) => Ok(()),
-            Err(e) => Err(pyo3::exceptions::PyIOError::new_err(e.to_string())),
-        }
+            .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?
+            .to_string();
+        py.detach(move || self.inner.save(&path_str))
+            .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))
     }
 
     /// Strip sequences from the index to save memory.
@@ -598,15 +597,15 @@ impl Aligner {
     ///     Aligner: The initialized aligner object.
     #[staticmethod]
     #[pyo3(signature = (path, preset=Some(Preset::MapOnt)))]
-    fn from_fasta(path: PathBuf, preset: Option<Preset>) -> PyResult<Self> {
+    fn from_fasta(py: Python<'_>, path: PathBuf, preset: Option<Preset>) -> PyResult<Self> {
         let path_str = path
             .to_str()
-            .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?;
+            .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?
+            .to_string();
         let preset_enum: RustPreset = preset.unwrap_or(Preset::MapOnt).into();
-        match RustAligner::from_fasta(path_str, preset_enum) {
-            Ok(inner) => Ok(Aligner { inner }),
-            Err(e) => Err(pyo3::exceptions::PyIOError::new_err(e.to_string())),
-        }
+        py.detach(move || RustAligner::from_fasta(&path_str, preset_enum))
+            .map(|inner| Aligner { inner })
+            .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))
     }
 
     /// Create an aligner from an index file.
@@ -619,15 +618,15 @@ impl Aligner {
     ///     Aligner: The initialized aligner object.
     #[staticmethod]
     #[pyo3(signature = (path, preset=Some(Preset::MapOnt)))]
-    fn from_index(path: PathBuf, preset: Option<Preset>) -> PyResult<Self> {
+    fn from_index(py: Python<'_>, path: PathBuf, preset: Option<Preset>) -> PyResult<Self> {
         let path_str = path
             .to_str()
-            .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?;
+            .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?
+            .to_string();
         let preset_enum: RustPreset = preset.unwrap_or(Preset::MapOnt).into();
-        match RustAligner::from_index(path_str, preset_enum) {
-            Ok(inner) => Ok(Aligner { inner }),
-            Err(e) => Err(pyo3::exceptions::PyIOError::new_err(e.to_string())),
-        }
+        py.detach(move || RustAligner::from_index(&path_str, preset_enum))
+            .map(|inner| Aligner { inner })
+            .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))
     }
 
     /// Maps a single query sequence sequentially to the targets.
@@ -640,11 +639,17 @@ impl Aligner {
     ///     MappingIterator: An iterator over the generated mappings.
     fn map(
         &self,
+        py: Python<'_>,
         query_name: &Bound<'_, PyBytes>,
         query_seq: &Bound<'_, PyBytes>,
     ) -> MappingIterator {
-        let query_name_str = String::from_utf8_lossy(query_name.as_bytes()).to_string();
-        let map_result = self.inner.map_seq(&query_name_str, query_seq.as_bytes());
+        let name_bytes = query_name.as_bytes();
+        let seq_bytes = query_seq.as_bytes();
+
+        let map_result = py.detach(move || {
+            let query_name_str = String::from_utf8_lossy(name_bytes);
+            self.inner.map_seq(query_name_str.as_ref(), seq_bytes)
+        });
 
         MappingIterator {
             iter: map_result.mappings.into_iter(),
