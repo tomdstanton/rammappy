@@ -81,10 +81,7 @@ impl FastxReader {
 /// Returns a list of (name, sequence) pairs.
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn read_fasta<'py>(
-    py: Python<'py>,
-    path: std::path::PathBuf,
-) -> PyResult<Vec<PySeq<'py>>> {
+pub fn read_fasta<'py>(py: Python<'py>, path: std::path::PathBuf) -> PyResult<Vec<PySeq<'py>>> {
     match rammap::fasta::read_fasta(path) {
         Ok(seqs) => {
             let py_seqs = seqs
