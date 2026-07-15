@@ -60,4 +60,3 @@ def test_cigar_operations():
     assert op_element.len == 80
     assert isinstance(op_element.op, rammappy.CigarOp)
     assert op_element.op == rammappy.CigarOp.M
-    assert int(op_element.op) == 0

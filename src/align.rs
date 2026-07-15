@@ -481,6 +481,7 @@ impl Index {
     ///
     /// Returns:
     ///     list[str]: The list of sequence names.
+
     #[getter]
     fn seq_names(&self) -> Vec<String> {
         self.inner.seqs.iter().map(|s| s.name.clone()).collect()
@@ -558,15 +559,15 @@ impl Aligner {
     /// Returns:
     ///     Aligner: The initialized aligner object.
     #[new]
-    #[pyo3(signature = (index, preset=Preset::MapOnt, do_cigar=true, do_cs=true, do_md=true))]
+    #[pyo3(signature = (index, preset=Some(Preset::MapOnt), do_cigar=true, do_cs=true, do_md=true))]
     fn new(
         index: &Index,
-        preset: Preset,
+        preset: Option<Preset>,
         do_cigar: bool,
         do_cs: bool,
         do_md: bool,
     ) -> PyResult<Self> {
-        let preset_enum: RustPreset = preset.into();
+        let preset_enum: RustPreset = preset.unwrap_or(Preset::MapOnt).into();
 
         let mut buf = Vec::new();
         index
@@ -596,12 +597,12 @@ impl Aligner {
     /// Returns:
     ///     Aligner: The initialized aligner object.
     #[staticmethod]
-    #[pyo3(signature = (path, preset=Preset::MapOnt))]
-    fn from_fasta(path: PathBuf, preset: Preset) -> PyResult<Self> {
+    #[pyo3(signature = (path, preset=Some(Preset::MapOnt)))]
+    fn from_fasta(path: PathBuf, preset: Option<Preset>) -> PyResult<Self> {
         let path_str = path
             .to_str()
             .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?;
-        let preset_enum: RustPreset = preset.into();
+        let preset_enum: RustPreset = preset.unwrap_or(Preset::MapOnt).into();
         match RustAligner::from_fasta(path_str, preset_enum) {
             Ok(inner) => Ok(Aligner { inner }),
             Err(e) => Err(pyo3::exceptions::PyIOError::new_err(e.to_string())),
@@ -617,12 +618,12 @@ impl Aligner {
     /// Returns:
     ///     Aligner: The initialized aligner object.
     #[staticmethod]
-    #[pyo3(signature = (path, preset=Preset::MapOnt))]
-    fn from_index(path: PathBuf, preset: Preset) -> PyResult<Self> {
+    #[pyo3(signature = (path, preset=Some(Preset::MapOnt)))]
+    fn from_index(path: PathBuf, preset: Option<Preset>) -> PyResult<Self> {
         let path_str = path
             .to_str()
             .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid path string"))?;
-        let preset_enum: RustPreset = preset.into();
+        let preset_enum: RustPreset = preset.unwrap_or(Preset::MapOnt).into();
         match RustAligner::from_index(path_str, preset_enum) {
             Ok(inner) => Ok(Aligner { inner }),
             Err(e) => Err(pyo3::exceptions::PyIOError::new_err(e.to_string())),
@@ -749,6 +750,26 @@ impl Aligner {
     ///
     /// Returns:
     ///     list[str]: The list of sequence names.
+
+    /// Get the current mapping options.
+    ///
+    /// Returns:
+    ///     MapOptions: A copy of the current mapping options.
+    #[getter]
+    fn options(&self) -> PyResult<crate::options::PyMapOptions> {
+        Ok(self.inner.options().clone().into())
+    }
+
+    /// Set the mapping options.
+    ///
+    /// Args:
+    ///     opts (MapOptions): The new mapping options to apply.
+    #[setter]
+    fn set_options(&mut self, opts: crate::options::PyMapOptions) -> PyResult<()> {
+        *self.inner.options_mut() = opts.into();
+        Ok(())
+    }
+
     #[getter]
     fn seq_names(&self) -> Vec<String> {
         self.inner
