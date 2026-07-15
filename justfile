@@ -69,6 +69,7 @@ ci: fmt-check lint test
 
 # Build production wheels
 build-wheels:
+    rm -rf target/wheels
     uvx maturin build --release
 
 # Set version in Cargo.toml (useful in CI to sync with git tag)
