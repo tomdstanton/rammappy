@@ -389,16 +389,16 @@ impl From<MapOptions> for PyMapOptions {
 
 impl From<PyMapOptions> for MapOptions {
     fn from(p: PyMapOptions) -> Self {
-        let mut opts = MapOptions::default();
-        opts.seeding = p.seeding.into();
-        opts.chaining = p.chaining.into();
-        opts.scoring = p.scoring.into();
-        opts.alignment = p.alignment.into();
-        opts.filtering = p.filtering.into();
-        opts.pairing = p.pairing.into();
-        opts.mini_batch_size = p.mini_batch_size;
-        // Note: flags aren't fully exposed in MapOptions wrapper here, we preserve default or what's inside
-        opts
+        MapOptions {
+            seeding: p.seeding.into(),
+            chaining: p.chaining.into(),
+            scoring: p.scoring.into(),
+            alignment: p.alignment.into(),
+            filtering: p.filtering.into(),
+            pairing: p.pairing.into(),
+            mini_batch_size: p.mini_batch_size,
+            ..MapOptions::default()
+        }
     }
 }
 

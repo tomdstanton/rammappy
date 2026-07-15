@@ -751,10 +751,6 @@ impl Aligner {
             })
     }
 
-    /// Returns the sequence names in the index.
-    ///
-    /// Returns:
-    ///     list[str]: The list of sequence names.
 
     /// Get the current mapping options.
     ///
