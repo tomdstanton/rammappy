@@ -4,6 +4,8 @@ use pyo3::types::PyBytes;
 use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pyfunction, gen_stub_pymethods};
 use rammap::fasta::Reader as RustFastxReader;
 
+type PySeq<'py> = (String, Bound<'py, PyBytes>);
+
 /// A reader for parsing FASTA/FASTQ files.
 ///
 /// The `FastxReader` allows parsing of uncompressed or gzip-compressed
@@ -48,7 +50,7 @@ impl FastxReader {
     ///
     /// Yields:
     ///     Record: The sequence record.
-    fn __next__<'py>(&mut self) -> Option<Record> {
+    fn __next__(&mut self) -> Option<Record> {
         match self.reader.read_next() {
             Ok(Some(rec)) => Some(Record { inner: rec }),
             _ => None,
@@ -61,7 +63,7 @@ impl FastxReader {
         &mut self,
         py: Python<'py>,
         batch_size: u64,
-    ) -> PyResult<(Vec<(String, Bound<'py, PyBytes>)>, bool)> {
+    ) -> PyResult<(Vec<PySeq<'py>>, bool)> {
         match self.reader.read_batch(batch_size) {
             Ok((seqs, is_eof)) => {
                 let py_seqs = seqs
@@ -82,7 +84,7 @@ impl FastxReader {
 pub fn read_fasta<'py>(
     py: Python<'py>,
     path: std::path::PathBuf,
-) -> PyResult<Vec<(String, Bound<'py, PyBytes>)>> {
+) -> PyResult<Vec<PySeq<'py>>> {
     match rammap::fasta::read_fasta(path) {
         Ok(seqs) => {
             let py_seqs = seqs
@@ -102,7 +104,7 @@ pub fn read_fasta<'py>(
 pub fn parse_fasta_bytes<'py>(
     py: Python<'py>,
     data: &Bound<'py, PyBytes>,
-) -> PyResult<Vec<(String, Bound<'py, PyBytes>)>> {
+) -> PyResult<Vec<PySeq<'py>>> {
     match rammap::fasta::parse_fasta_bytes(data.as_bytes()) {
         Ok(seqs) => {
             let py_seqs = seqs
