@@ -49,7 +49,7 @@ def test_parse_fasta_bytes():
 def test_fasta_streamer():
     streamer = rammappy.FastaStreamer(rna_to_dna=False)
     streamer.push(b">seq1\nACGT\n>seq2\n")
-    
+
     # First record should be ready
     r1 = streamer.next_record()
     assert r1 is not None
@@ -70,7 +70,7 @@ def test_fasta_streamer():
 def test_fastq_streamer():
     streamer = rammappy.FastqStreamer(rna_to_dna=False)
     streamer.push(b"@r1\nACGT\n+\n!!!!\n@r2\nG")
-    
+
     r1 = streamer.next_record()
     assert r1 is not None
     assert r1 == ("r1", b"ACGT")
