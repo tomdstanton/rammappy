@@ -124,6 +124,28 @@ You can create an aligner by providing the built index and a preset configuratio
 aligner = rammappy.Aligner(index, preset=rammappy.Preset.Sr)
 ```
 
+### ⚙️ Advanced Configuration (Options)
+
+A core feature of `rammappy` is the ability to expose and modify the underlying mapping options on the fly. 
+After creating an `Aligner`, you can access and mutate its `options` object to fine-tune seeding, chaining, or scoring behavior:
+
+```python
+opts = aligner.options
+
+# Modify seeding parameters
+seeding = opts.seeding
+seeding.min_mid_occ = 42
+opts.seeding = seeding
+
+# Modify scoring parameters
+scoring = opts.scoring
+scoring.match_score = 3
+opts.scoring = scoring
+
+# Apply the modified options back to the aligner
+aligner.options = opts
+```
+
 ### 🔬 Batch Alignment
 
 Querying multiple sequences can be done via `map_batch`, which drops the GIL and runs in parallel using Rust's Rayon ecosystem:
@@ -177,7 +199,9 @@ Traditional bindings like [`mappy`](https://pypi.org/project/mappy/) force users
 Scaling genomic query alignments in parallel on multi-core systems mandates threading. However, the presence of the Python Global Interpreter Lock (GIL) poses problems, as normal PyO3 structures retain a lock on the main Python thread.
 
 **The Solution:**
-We collect batches of targets mapped to pointers and lengths. We wrap these representations in a custom struct `RawQuery { name_ptr, seq_ptr, ... }`. We implement `unsafe impl Send for RawQuery` and `unsafe impl Sync for RawQuery`, allowing pointer transmission across thread boundaries. The GIL is then released via `py.detach(|| { ... })`, and `rayon` handles iterating and distributing alignments across all CPU cores. `unsafe { std::slice::from_raw_parts }` safely rebuilds the byte vectors in the isolated thread spaces, as the parent function's stack guarantees the memory allocation outlives the closure.
+For operations like `Index::build`, `Index::load`, and `Aligner::map`, the GIL is unconditionally released via `py.detach(|| { ... })`, allowing true multi-threading in Python while Rust performs the heavy computations. 
+
+For batch mapping (`map_batch`), we additionally wrap target queries in a custom struct `RawQuery { name_ptr, seq_ptr, ... }`. We implement `unsafe impl Send for RawQuery` and `unsafe impl Sync for RawQuery`, allowing pointer transmission across thread boundaries. After dropping the GIL with `py.detach`, `rayon` handles iterating and distributing alignments across all CPU cores. `unsafe { std::slice::from_raw_parts }` safely rebuilds the byte vectors in the isolated thread spaces, as the parent function's stack guarantees the memory allocation outlives the closure.
 
 ### Lazy Materialization
 Rather than computing alignment lists as heavy `Vec<Mapping>` aggregates and immediately converting every hit to a Python-native object (costing heavy FFI time), `rammappy` returns a `MappingIterator`. A `MappingIterator` acts as an opaque handle holding the vector of internal `RustMapping` entries. Only when a user invokes `next(iterator)` is the memory read and a single Python `Mapping` object initialized and surfaced over the FFI boundary.
