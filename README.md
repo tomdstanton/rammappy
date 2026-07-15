@@ -45,6 +45,51 @@ just install
 
 ## 💡 Examples
 
+### 🧬 Parsing FASTA/FASTQ Files
+
+`rammappy` includes a high-performance parsing module for FASTA and FASTQ files. It can automatically detect the file format and supports reading from disk, parsing directly from memory (bytes), or even streaming data in chunks!
+
+**Reading from a file**
+```python
+import rammappy
+
+# FastxReader automatically detects FASTA or FASTQ and handles them efficiently
+reader = rammappy.FastxReader("sequences.fa")
+for record in reader:
+    print(f"Name: {record.name}")
+    print(f"Sequence: {record.sequence}")
+    if record.quality:
+        print(f"Quality: {record.quality}")
+
+# Or use the convenience function to read all records at once
+seqs = rammappy.read_fasta("sequences.fa")
+```
+
+**Parsing from memory**
+```python
+# Parse bytes directly without touching the disk
+data = b">seq1\nACGT\n>seq2\nGGGG\n"
+seqs = rammappy.parse_fasta_bytes(data)
+```
+
+**Streaming data**
+For network streams or chunked processing, you can push chunks of bytes and process records as they become available:
+```python
+streamer = rammappy.FastaStreamer(rna_to_dna=False)
+streamer.push(b">seq1\nACGT\n>seq2\n")
+
+# Process records that are complete
+while (record := streamer.next_record()) is not None:
+    print(f"Ready: {record[0]}")  # Prints seq1
+
+# Push more data later
+streamer.push(b"GGGG\n")
+streamer.finalize()
+
+while (record := streamer.next_record()) is not None:
+    print(f"Ready: {record[0]}")  # Prints seq2
+```
+
 ### 🧠 Building an Index In-Memory
 
 A significant advantage of `rammappy` over [`mappy`](https://pypi.org/project/mappy/) (the official [`minimap2`](lh3.github.io/minimap2) Python bindings) is the 
