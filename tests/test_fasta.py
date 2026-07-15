@@ -1,6 +1,6 @@
-import pytest
-import rammappy
 from pathlib import Path
+
+import rammappy
 
 
 def test_record():

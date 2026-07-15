@@ -1,10 +1,10 @@
 from ._rammappy import (
-    FastxReader,
-    Record,
     FastaStreamer,
     FastqStreamer,
-    read_fasta,
+    FastxReader,
+    Record,
     parse_fasta_bytes,
+    read_fasta,
 )
 
 __all__ = [

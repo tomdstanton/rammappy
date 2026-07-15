@@ -11,7 +11,7 @@ from .align import (
     Preset,
     Strand,
 )
-from .fasta import FastxReader, Record, FastaStreamer, FastqStreamer, read_fasta, parse_fasta_bytes
+from .fasta import FastaStreamer, FastqStreamer, FastxReader, Record, parse_fasta_bytes, read_fasta
 from .sketch import Minimizer, MinimizerSketcher, RandstrobeSketcher, SyncmerSketcher
 
 __all__ = [
