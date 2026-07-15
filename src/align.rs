@@ -751,7 +751,6 @@ impl Aligner {
             })
     }
 
-
     /// Get the current mapping options.
     ///
     /// Returns:
