@@ -1,3 +1,0 @@
-# rammappy.io
-
-::: rammappy.io

@@ -3,7 +3,7 @@ use pyo3::prelude::*;
 use pyo3_stub_gen::define_stub_info_gatherer;
 
 pub mod align;
-pub mod io;
+mod fasta;
 pub mod sketch;
 
 define_stub_info_gatherer!(stub_info);
@@ -12,7 +12,7 @@ define_stub_info_gatherer!(stub_info);
 fn _rammappy(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     align::register(m)?;
     sketch::register(m)?;
-    io::register(m)?;
+    fasta::register(m)?;
     Ok(())
 }
 

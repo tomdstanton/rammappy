@@ -246,15 +246,6 @@ wheels = [
 ]
 
 [[package]]
-name = "mappy"
-version = "2.31"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/33/d2/8b283f6fc644260bb1fd44add72695bfa036b99d9cf050a53b3b27eba774/mappy-2.31.tar.gz", hash = "sha256:152a358c11cba1f992968e2611f1e0a1f4a87aaaa3602d93e4f59d7c1db8f3b2", size = 143995, upload-time = "2026-05-19T23:29:40.073Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ec/15/c007658d6a04bd1c2c370c4ee174a0f64e2de844e42849b9fdeda5d6ead7/mappy-2.31-cp314-cp314-macosx_15_0_arm64.whl", hash = "sha256:e83bc6eb025634fe378e269a2a49c36f2e50b67b93034f7acd5916f8f9abc2e3", size = 143617, upload-time = "2026-05-19T23:29:38.478Z" },
-]
-
-[[package]]
 name = "markdown"
 version = "3.10.2"
 source = { registry = "https://pypi.org/simple" }
@@ -724,13 +715,11 @@ source = { editable = "." }
 
 [package.dev-dependencies]
 bench = [
-    { name = "mappy" },
     { name = "pytest-benchmark" },
 ]
 dev = [
     { name = "black" },
     { name = "catppuccin-zensical" },
-    { name = "mappy" },
     { name = "maturin" },
     { name = "mkdocstrings", extra = ["python"] },
     { name = "pytest" },
@@ -753,14 +742,10 @@ test = [
 [package.metadata]
 
 [package.metadata.requires-dev]
-bench = [
-    { name = "mappy" },
-    { name = "pytest-benchmark", specifier = ">=5.2.3" },
-]
+bench = [{ name = "pytest-benchmark", specifier = ">=5.2.3" }]
 dev = [
     { name = "black", specifier = ">=25.11.0" },
     { name = "catppuccin-zensical", specifier = ">=0.2.3" },
-    { name = "mappy" },
     { name = "maturin", specifier = ">=1.5,<2.0" },
     { name = "mkdocstrings", extras = ["python"] },
     { name = "pytest" },

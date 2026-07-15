@@ -26,10 +26,13 @@ jobs:
         run: just set-version ${{ github.ref_name }}
       - name: Build wheels
         run: just build-wheels
+      - name: Build sdist
+        if: matrix.os == 'ubuntu-latest'
+        run: uvx maturin sdist -o target/wheels
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}
-          path: target/wheels/*.whl
+          path: target/wheels/*
 
   publish:
     name: Publish to PyPI
@@ -47,6 +50,6 @@ jobs:
           path: dist
           merge-multiple: true
       - name: Remove unsupported linux wheels
-        run: rm -f dist/*-linux_*.whl
+        run: find dist -name "*-linux_*.whl" -delete
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

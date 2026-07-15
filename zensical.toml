@@ -10,7 +10,7 @@ nav = [
         { "Overview" = "api/index.md" },
         { "Align" = "api/align.md" },
         { "Sketch" = "api/sketch.md" },
-        { "IO" = "api/io.md" }
+        { "IO / FASTA" = "api/fasta.md" }
     ] },
     { "Development" = [
         { "Contributing" = "contributing.md" }

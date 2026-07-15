@@ -11,6 +11,8 @@ __all__ = [
     "Aligner",
     "CigarElement",
     "CigarOp",
+    "FastaStreamer",
+    "FastqStreamer",
     "FastxReader",
     "Index",
     "Mapping",
@@ -19,8 +21,11 @@ __all__ = [
     "MinimizerSketcher",
     "Preset",
     "RandstrobeSketcher",
+    "Record",
     "Strand",
     "SyncmerSketcher",
+    "parse_fasta_bytes",
+    "read_fasta",
 ]
 
 @typing.final
@@ -184,6 +189,56 @@ class CigarElement:
     def op(self) -> CigarOp: ...
 
 @typing.final
+class FastaStreamer:
+    r"""
+    Streaming FASTA parser. Push bytes via `push`; pop completed
+    `(name, seq)` pairs via `next_record`; flush the
+    in-flight record (if any) at end-of-input via `finalize`.
+    """
+
+    def __new__(cls, rna_to_dna: builtins.bool = True) -> FastaStreamer: ...
+    def push(self, chunk: bytes) -> None:
+        r"""
+        Feed a chunk of bytes. Records that complete inside this chunk are
+        queued for `next_record`.
+        """
+
+    def next_record(self) -> typing.Optional[tuple[builtins.str, bytes]]:
+        r"""
+        Pop a completed record from the internal queue.
+        """
+
+    def finalize(self) -> None:
+        r"""
+        Flush the trailing partial line + the in-flight record. Call once after
+        the last `push`. The flushed record (if any) is appended to the queue
+        — drain with `next_record`.
+        """
+
+@typing.final
+class FastqStreamer:
+    r"""
+    Streaming FASTQ parser. 4-line records: `@name`, sequence, `+`, quality.
+    Quality scores are consumed and discarded; only `(name, seq)` is yielded.
+    """
+
+    def __new__(cls, rna_to_dna: builtins.bool = True) -> FastqStreamer: ...
+    def push(self, chunk: bytes) -> None:
+        r"""
+        Feed a chunk of bytes.
+        """
+
+    def next_record(self) -> typing.Optional[tuple[builtins.str, bytes]]:
+        r"""
+        Pop a completed record from the internal queue.
+        """
+
+    def finalize(self) -> None:
+        r"""
+        Flush the trailing partial line + the in-flight record.
+        """
+
+@typing.final
 class FastxReader:
     r"""
     A reader for parsing FASTA/FASTQ files.
@@ -194,8 +249,8 @@ class FastxReader:
     Examples:
         >>> from rammappy import FastxReader
         >>> reader = FastxReader("test.fa")
-        >>> for name, seq, qual in reader:
-        ...     print(f"{name}: {seq}")
+        >>> for record in reader:
+        ...     print(f"{record.name}: {record.sequence}")
     """
 
     def __new__(cls, path: builtins.str | os.PathLike | pathlib.Path) -> FastxReader:
@@ -213,13 +268,20 @@ class FastxReader:
         """
 
     def __iter__(self) -> FastxReader: ...
-    def __next__(self) -> typing.Optional[tuple[builtins.str, bytes, typing.Optional[bytes]]]:
+    def __next__(self) -> typing.Optional[Record]:
         r"""
         Return the next sequence record.
 
         Yields:
-            tuple[str, bytes, bytes | None]: A tuple containing the sequence name,
-            the sequence itself (as bytes), and optionally the quality string (as bytes).
+            Record: The sequence record.
+        """
+
+    def read_batch(
+        self, batch_size: builtins.int
+    ) -> tuple[builtins.list[tuple[builtins.str, bytes]], builtins.bool]:
+        r"""
+        Read sequences until cumulative bases exceed batch_size.
+        Returns (seqs, is_eof). Caller can call again for the next batch.
         """
 
 @typing.final
@@ -533,6 +595,29 @@ class RandstrobeSketcher:
         """
 
 @typing.final
+class Record:
+    r"""
+    A sequence record from a FASTA or FASTQ file.
+    """
+
+    @property
+    def name(self) -> builtins.str: ...
+    @property
+    def description(self) -> typing.Optional[builtins.str]: ...
+    @property
+    def sequence(self) -> bytes: ...
+    @property
+    def quality(self) -> typing.Optional[bytes]: ...
+    def __new__(
+        cls,
+        name: builtins.str,
+        description: typing.Optional[builtins.str],
+        sequence: typing.Sequence[builtins.int],
+        quality: typing.Optional[typing.Sequence[builtins.int]] = None,
+    ) -> Record: ...
+    def __repr__(self) -> builtins.str: ...
+
+@typing.final
 class SyncmerSketcher:
     r"""
     A sketcher that extracts syncmers from sequences.
@@ -625,3 +710,17 @@ class Strand(enum.Enum):
 
     Forward = ...
     Reverse = ...
+
+def parse_fasta_bytes(data: bytes) -> builtins.list[tuple[builtins.str, bytes]]:
+    r"""
+    Parse FASTA from a byte slice (works with mmap or regular buffers)
+    Returns a list of (name, sequence) pairs.
+    """
+
+def read_fasta(
+    path: builtins.str | os.PathLike | pathlib.Path,
+) -> builtins.list[tuple[builtins.str, bytes]]:
+    r"""
+    Read all sequences from a FASTA file into memory.
+    Returns a list of (name, sequence) pairs.
+    """

@@ -36,7 +36,7 @@ It directly links to the [`rammap-core`](https://crates.io/crates/rammap-core) c
 
 If you are building from source or working on development, we prefer using `uv` for environment and dependency management, along with `just` as a command runner:
 
-```console
+```bash
 just install
 ```
 

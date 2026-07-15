@@ -1,4 +1,4 @@
-from . import align, io, sketch
+from . import align, fasta, sketch
 
 # Re-export common classes for convenience
 from .align import (
@@ -11,13 +11,13 @@ from .align import (
     Preset,
     Strand,
 )
-from .io import FastxReader
+from .fasta import FastxReader, Record, FastaStreamer, FastqStreamer, read_fasta, parse_fasta_bytes
 from .sketch import Minimizer, MinimizerSketcher, RandstrobeSketcher, SyncmerSketcher
 
 __all__ = [
     "align",
     "sketch",
-    "io",
+    "fasta",
     "Aligner",
     "Preset",
     "Mapping",
@@ -27,6 +27,11 @@ __all__ = [
     "CigarElement",
     "Index",
     "FastxReader",
+    "Record",
+    "FastaStreamer",
+    "FastqStreamer",
+    "read_fasta",
+    "parse_fasta_bytes",
     "Minimizer",
     "MinimizerSketcher",
     "SyncmerSketcher",
