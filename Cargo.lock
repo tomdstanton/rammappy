@@ -687,7 +687,7 @@ dependencies = [
 
 [[package]]
 name = "rammappy"
-version = "0.1.0"
+version = "0.1.6"
 dependencies = [
  "pyo3",
  "pyo3-stub-gen",

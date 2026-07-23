@@ -167,8 +167,9 @@ impl From<RustCigarOp> for CigarElement {
 ///     cigar_ops (list[CigarElement] | None): Structured CIGAR operations, if requested.
 ///     cs (bytes | None): CS tag string, if requested.
 ///     md (bytes | None): MD tag string, if requested.
+
 #[gen_stub_pyclass]
-#[pyclass(module = "rammappy._rammappy", unsendable)]
+#[pyclass(module = "rammappy._rammappy")]
 pub struct Mapping {
     // Hold the underlying Rust mapping object directly.
     inner: RustMapping,
@@ -347,8 +348,9 @@ impl Mapping {
 ///
 /// Instead of allocating a list, we hold an iterator of Rust mappings
 /// and materialize Python wrapper objects only when requested via `next()`.
+
 #[gen_stub_pyclass]
-#[pyclass(module = "rammappy._rammappy", unsendable)]
+#[pyclass(module = "rammappy._rammappy")]
 pub struct MappingIterator {
     iter: std::vec::IntoIter<RustMapping>,
 }
@@ -375,12 +377,16 @@ impl MappingIterator {
 ///     >>> index = Index.build([(b"target1", b"ATGC...")])
 ///     >>> index.save("my_index.mmi")
 ///     >>> loaded_index = Index.load("my_index.mmi")
+
 #[gen_stub_pyclass]
-#[pyclass(module = "rammappy._rammappy", unsendable)]
+#[pyclass(module = "rammappy._rammappy")]
 #[derive(Clone)]
 pub struct Index {
     inner: RustIndex,
 }
+
+unsafe impl Send for Index {}
+unsafe impl Sync for Index {}
 
 #[gen_stub_pymethods]
 #[pymethods]
@@ -537,11 +543,15 @@ impl Index {
 ///     >>> aligner = Aligner(index, preset=Preset.MapOnt)
 ///     >>> for mapping in aligner.map(b"query1", b"ATGC..."):
 ///     ...     print(mapping.score)
+
 #[gen_stub_pyclass]
 #[pyclass(module = "rammappy._rammappy")]
 pub struct Aligner {
     inner: RustAligner,
 }
+
+unsafe impl Send for Aligner {}
+unsafe impl Sync for Aligner {}
 
 #[gen_stub_pymethods]
 #[pymethods]
